@@ -1,0 +1,519 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.trading-modal {
+  background: white;
+  border-radius: 16px;
+  width: 90vw;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 16px 16px 0 0;
+}
+
+.modal-header h2 {
+  color: #1976D2;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #666;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-button:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.stock-info-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.stock-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stock-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.stock-code {
+  font-size: 0.9rem;
+  color: #666;
+  font-family: monospace;
+}
+
+.price-info {
+  text-align: right;
+}
+
+.current-price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1976D2;
+  font-family: monospace;
+}
+
+.price-change {
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.price-change.positive {
+  color: #2E7D32;
+}
+
+.price-change.negative {
+  color: #C62828;
+}
+
+.holdings-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #E3F2FD;
+  border-radius: 8px;
+  border: 1px solid #BBDEFB;
+}
+
+.holdings-label {
+  color: #1976D2;
+  font-weight: 500;
+}
+
+.holdings-value {
+  color: #1976D2;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.quantity-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.quantity-section label {
+  color: #333;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.quantity-input-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.quantity-btn {
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quantity-btn:hover:not(:disabled) {
+  background: #1976D2;
+  transform: scale(1.05);
+}
+
+.quantity-btn:disabled {
+  background: #e0e0e0;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.quantity-input {
+  width: 120px;
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-family: monospace;
+  transition: border-color 0.2s ease;
+}
+
+.quantity-input:focus {
+  outline: none;
+  border-color: #2196F3;
+}
+
+.quantity-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.preset-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #2196F3;
+  background: white;
+  color: #2196F3;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.preset-btn:hover {
+  background: #2196F3;
+  color: white;
+}
+
+.preset-btn.all-btn {
+  border-color: #FF9800;
+  color: #FF9800;
+}
+
+.preset-btn.all-btn:hover {
+  background: #FF9800;
+  color: white;
+}
+
+.calculation-section {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+}
+
+.calc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.calc-row:last-child {
+  border-bottom: none;
+}
+
+.calc-row.total {
+  border-top: 2px solid #2196F3;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  font-weight: 600;
+}
+
+.calc-row.profit {
+  background: rgba(76, 175, 80, 0.1);
+  margin: 0.5rem -1rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+}
+
+.calc-label {
+  color: #666;
+  font-weight: 500;
+}
+
+.calc-value {
+  color: #333;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.calc-value.total-amount {
+  color: #1976D2;
+  font-size: 1.1rem;
+}
+
+.calc-value.positive {
+  color: #2E7D32;
+}
+
+.calc-value.negative {
+  color: #C62828;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+  background: #fafafa;
+  border-radius: 0 0 16px 16px;
+}
+
+.cancel-btn,
+.confirm-btn {
+  flex: 1;
+  padding: 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn {
+  background: #f5f5f5;
+  color: #666;
+  border: 1px solid #e0e0e0;
+}
+
+.cancel-btn:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.confirm-btn {
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.confirm-btn.buy {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+}
+
+.confirm-btn.buy:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+.confirm-btn.sell {
+  background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
+}
+
+.confirm-btn.sell:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
+}
+
+.confirm-btn:disabled {
+  background: #e0e0e0;
+  color: #999;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .trading-modal {
+    width: 95vw;
+    margin: 1rem;
+  }
+  
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 1rem;
+  }
+  
+  .modal-header h2 {
+    font-size: 1.1rem;
+  }
+  
+  .stock-info-section {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+  }
+  
+  .price-info {
+    text-align: center;
+  }
+  
+  .quantity-input-container {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .quantity-input {
+    width: 100%;
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+  }
+}
+
+/* 結果モーダル用スタイル */
+.result-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(6px);
+}
+
+.result-modal {
+  background: white;
+  border-radius: 20px;
+  width: 90vw;
+  max-width: 400px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+  animation: resultModalSlideIn 0.4s ease-out;
+  overflow: hidden;
+}
+
+@keyframes resultModalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.result-header {
+  text-align: center;
+  padding: 2rem 1.5rem 1rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.result-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.result-icon.success {
+  color: #4CAF50;
+}
+
+.result-icon.error {
+  color: #F44336;
+}
+
+.result-header h3 {
+  color: #333;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.result-body {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.result-message {
+  color: #555;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.result-footer {
+  padding: 1rem 1.5rem 1.5rem;
+  text-align: center;
+}
+
+.result-btn {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 100px;
+}
+
+.result-btn.success {
+  background: linear-gradient(45deg, #4CAF50, #45a049);
+  color: white;
+}
+
+.result-btn.error {
+  background: linear-gradient(45deg, #F44336, #e53935);
+  color: white;
+}
+
+.result-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}

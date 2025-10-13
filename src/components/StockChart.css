@@ -1,0 +1,243 @@
+.stock-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.stock-detail h3 {
+  color: #1976D2;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.stock-code-large {
+  color: #666;
+  font-family: monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.sector-info {
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.price-info {
+  text-align: right;
+}
+
+.current-price {
+  color: #1976D2;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: monospace;
+  margin-bottom: 0.25rem;
+}
+
+.price-change {
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.price-change.positive {
+  color: #2E7D32;
+}
+
+.price-change.negative {
+  color: #C62828;
+}
+
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.chart-title {
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.loading-text {
+  color: #2196F3;
+  font-size: 0.8rem;
+}
+
+.error-text {
+  color: #f44336;
+  font-size: 0.8rem;
+}
+
+.period-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.period-btn {
+  padding: 0.5rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 20px;
+  background: white;
+  color: #666;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.period-btn:hover {
+  border-color: #2196F3;
+  color: #2196F3;
+}
+
+.period-btn.active {
+  background: #2196F3;
+  border-color: #2196F3;
+  color: white;
+}
+
+.period-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.price-chart {
+  border-radius: 8px;
+  background: #fafafa;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.chart-labels {
+  display: flex;
+  justify-content: space-between;
+  width: 260px;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.stock-details {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detail-label {
+  color: #666;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.detail-value {
+  color: #333;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.chart-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.chart-buy-btn,
+.chart-sell-btn {
+  flex: 1;
+  padding: 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.chart-buy-btn {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.chart-buy-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+.chart-sell-btn {
+  background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+.chart-sell-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
+}
+
+@media (max-width: 768px) {
+  .chart-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .price-info {
+    text-align: left;
+  }
+  
+  .price-chart {
+    width: 100%;
+    max-width: 280px;
+  }
+  
+  .chart-labels {
+    width: 100%;
+    max-width: 240px;
+  }
+  
+  .stock-details {
+    grid-template-columns: 1fr;
+  }
+  
+  .chart-actions {
+    flex-direction: column;
+  }
+  
+  .current-price {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-buy-btn,
+  .chart-sell-btn {
+    padding: 0.75rem;
+    font-size: 0.8rem;
+  }
+}

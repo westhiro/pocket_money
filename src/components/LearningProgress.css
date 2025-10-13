@@ -1,0 +1,150 @@
+.learning-progress {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.learning-header {
+  margin-bottom: 1.5rem;
+}
+
+.learning-header h2 {
+  color: #1976D2;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.current-video {
+  margin-bottom: 2rem;
+}
+
+.current-video h3 {
+  color: #333;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+}
+
+.video-info {
+  margin-bottom: 1rem;
+}
+
+.video-title {
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.video-time {
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 10px;
+  background: #E3F2FD;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+.progress-percentage {
+  color: #1976D2;
+  font-weight: 600;
+  font-size: 0.875rem;
+  min-width: 40px;
+}
+
+.recent-courses h3 {
+  color: #333;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+}
+
+.courses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.course-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.course-title {
+  color: #333;
+  font-size: 0.875rem;
+  font-weight: 500;
+  flex: 1;
+}
+
+.course-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 80px;
+}
+
+.mini-progress-bar {
+  width: 40px;
+  height: 6px;
+  background: #E3F2FD;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.mini-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.course-percentage {
+  color: #1976D2;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .learning-progress {
+    padding: 1rem;
+  }
+  
+  .course-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .course-progress {
+    align-self: flex-end;
+  }
+}

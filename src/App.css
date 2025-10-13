@@ -1,0 +1,57 @@
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.loading-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  color: white;
+}
+
+.loading-spinner h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.auth-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  padding: 2rem;
+}
+
+.auth-container {
+  text-align: center;
+  color: white;
+  width: 100%;
+  max-width: 400px;
+}
+
+.app-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.app-description {
+  font-size: 1.125rem;
+  margin: 0 0 2rem 0;
+  opacity: 0.9;
+}
