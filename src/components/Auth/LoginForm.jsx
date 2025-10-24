@@ -36,18 +36,18 @@ const LoginForm = ({ onSwitchToRegister, onClose }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold text-center mb-6 text-blue-600">ログイン</h2>
-      
+    <div className="max-w-md w-full mx-auto bg-white p-8 rounded-xl shadow-2xl">
+      <h2 className="text-3xl font-bold text-center mb-8 text-blue-600">ログイン</h2>
+
       {errors.general && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
           {errors.general}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
             メールアドレス
           </label>
           <input
@@ -57,13 +57,13 @@ const LoginForm = ({ onSwitchToRegister, onClose }) => {
             value={formData.email}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
             placeholder="example@email.com"
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
             パスワード
           </label>
           <input
@@ -73,7 +73,7 @@ const LoginForm = ({ onSwitchToRegister, onClose }) => {
             value={formData.password}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
             placeholder="パスワードを入力"
           />
         </div>
@@ -81,18 +81,18 @@ const LoginForm = ({ onSwitchToRegister, onClose }) => {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200 font-semibold text-base shadow-md hover:shadow-lg"
         >
           {isLoading ? 'ログイン中...' : 'ログイン'}
         </button>
       </form>
 
-      <div className="text-center mt-4">
+      <div className="text-center mt-6 pt-6 border-t border-gray-200">
         <p className="text-sm text-gray-600">
           アカウントをお持ちでない方は{' '}
           <button
             onClick={onSwitchToRegister}
-            className="text-blue-600 hover:underline"
+            className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition duration-200"
           >
             新規登録
           </button>

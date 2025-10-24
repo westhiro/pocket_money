@@ -107,7 +107,7 @@ class TradingController extends Controller
             'price_per_share' => $currentPrice,
             'total_amount' => $totalAmount,
             'coin_change' => -$totalAmount,
-            'current_coins_after' => $newCoinBalance
+            'coin_balance_after' => $newCoinBalance
         ]);
 
         // コイン履歴記録
@@ -176,7 +176,7 @@ class TradingController extends Controller
             'price_per_share' => $currentPrice,
             'total_amount' => $totalAmount,
             'coin_change' => $totalAmount,
-            'current_coins_after' => $newCoinBalance
+            'coin_balance_after' => $newCoinBalance
         ]);
 
         // コイン履歴記録
