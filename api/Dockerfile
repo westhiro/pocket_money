@@ -24,6 +24,9 @@ COPY . /var/www/html
 # Composerの依存関係をインストール
 RUN composer install --no-dev --optimize-autoloader
 
+# .envファイルを削除（環境変数を優先）
+RUN rm -f .env
+
 # 権限設定
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
