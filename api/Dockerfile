@@ -21,8 +21,8 @@ WORKDIR /var/www/html
 # アプリケーションファイルをコピー（apiディレクトリの中身を/var/www/htmlにコピー）
 COPY . /var/www/html
 
-# Composerの依存関係をインストール
-RUN composer install --no-dev --optimize-autoloader
+# Composerの依存関係をインストール（fakerも含める）
+RUN composer install --optimize-autoloader
 
 # .envファイルを削除（環境変数を優先）
 RUN rm -f .env

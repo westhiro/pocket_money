@@ -48,6 +48,16 @@ class StockSeeder extends Seeder
         ];
 
         foreach ($stocks as $stock) {
+            // 既存のデータがあればスキップ
+            $existingStock = \DB::table('stocks')
+                ->where('stock_symbol', $stock['stock_symbol'])
+                ->first();
+
+            if ($existingStock) {
+                echo "Stock {$stock['stock_symbol']} already exists, skipping...\n";
+                continue;
+            }
+
             $stockId = \DB::table('stocks')->insertGetId([
                 'industry_id' => $stock['industry_id'],
                 'company_name' => $stock['company_name'],
