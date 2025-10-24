@@ -32,7 +32,18 @@ RUN chown -R www-data:www-data /var/www/html \
 # ポート設定
 EXPOSE 8000
 
+# 起動スクリプトを作成
+RUN echo '#!/bin/bash\n\
+set -e\n\
+echo "Waiting for database..."\n\
+sleep 5\n\
+echo "Running migrations..."\n\
+php artisan migrate --force || true\n\
+echo "Running seeders..."\n\
+php artisan db:seed --force || true\n\
+echo "Starting server..."\n\
+php artisan serve --host=0.0.0.0 --port=$PORT\n\
+' > /usr/local/bin/start.sh && chmod +x /usr/local/bin/start.sh
+
 # Artisan serveでアプリケーションを起動
-CMD php artisan migrate --force && \
-    php artisan db:seed --force && \
-    php artisan serve --host=0.0.0.0 --port=8000
+CMD ["/usr/local/bin/start.sh"]
