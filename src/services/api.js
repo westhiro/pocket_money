@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-// APIベースURL  
-const API_BASE_URL = 'http://localhost:8000/api';
+// APIベースURL（環境変数から取得、なければローカルホスト）
+const API_BASE_URL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : 'http://localhost:8000/api';
 
 // axiosインスタンス作成
 const api = axios.create({
