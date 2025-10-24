@@ -27,6 +27,16 @@ class IndustrySeeder extends Seeder
         ];
 
         foreach ($industries as $industry) {
+            // 既存の業種があればスキップ
+            $existingIndustry = \DB::table('industries')
+                ->where('name', $industry['name'])
+                ->first();
+
+            if ($existingIndustry) {
+                echo "Industry '{$industry['name']}' already exists, skipping...\n";
+                continue;
+            }
+
             \DB::table('industries')->insert([
                 'name' => $industry['name'],
                 'description' => $industry['description'],

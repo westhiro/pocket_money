@@ -111,6 +111,16 @@ class LearningVideoSeeder extends Seeder
         ];
 
         foreach ($videos as $video) {
+            // 既存の動画があればスキップ
+            $existingVideo = \DB::table('learning_videos')
+                ->where('title', $video['title'])
+                ->first();
+
+            if ($existingVideo) {
+                echo "Video '{$video['title']}' already exists, skipping...\n";
+                continue;
+            }
+
             \DB::table('learning_videos')->insert([
                 'title' => $video['title'],
                 'description' => $video['description'],

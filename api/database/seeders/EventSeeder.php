@@ -132,6 +132,16 @@ class EventSeeder extends Seeder
 
         // イベント挿入
         foreach ($events as $index => $event) {
+            // 既存のイベントがあればスキップ
+            $existingEvent = \DB::table('events')
+                ->where('title', $event['title'])
+                ->first();
+
+            if ($existingEvent) {
+                echo "Event '{$event['title']}' already exists, skipping...\n";
+                continue;
+            }
+
             \DB::table('events')->insert([
                 'id' => $index + 1,
                 'title' => $event['title'],
