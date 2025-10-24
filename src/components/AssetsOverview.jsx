@@ -74,7 +74,7 @@ const AssetsOverview = () => {
 
   const totalAssets = assetData?.total_assets || 0
   const stockValue = assetData?.stock_value || 0
-  const coinBalance = assetData?.coin_balance || 0
+  const coinBalance = assetData?.current_coins || 0
   
   // 資産配分の計算
   const assetAllocation = []

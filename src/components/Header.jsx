@@ -82,7 +82,7 @@ const Header = () => {
             {isAuthenticated && (
               <div className="coin-balance">
                 <span className="coin-icon">🪙</span>
-                <span className="coin-amount">{Math.round(user?.coin_balance || 0).toLocaleString()}</span>
+                <span className="coin-amount">{Math.round(user?.current_coins || 0).toLocaleString()}</span>
               </div>
             )}
 

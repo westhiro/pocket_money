@@ -21,7 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'coin_balance',
+        'current_coins',
     ];
 
     /**
@@ -44,7 +44,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'coin_balance' => 'decimal:2',
+            'current_coins' => 'decimal:2',
         ];
     }
 

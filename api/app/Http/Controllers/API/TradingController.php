@@ -59,10 +59,10 @@ class TradingController extends Controller
     private function processBuy($user, $stock, $quantity, $currentPrice, $totalAmount)
     {
         // コイン残高チェック
-        if ($user->coin_balance < $totalAmount) {
+        if ($user->current_coins < $totalAmount) {
             return [
                 'success' => false,
-                'message' => 'コインが不足しています。現在の残高: ' . number_format($user->coin_balance) . 'コイン'
+                'message' => 'コインが不足しています。現在の残高: ' . number_format($user->current_coins) . 'コイン'
             ];
         }
 
@@ -95,8 +95,8 @@ class TradingController extends Controller
         }
 
         // コイン残高更新
-        $newCoinBalance = $user->coin_balance - $totalAmount;
-        $user->update(['coin_balance' => $newCoinBalance]);
+        $newCoinBalance = $user->current_coins - $totalAmount;
+        $user->update(['current_coins' => $newCoinBalance]);
 
         // 取引履歴記録
         TradeHistory::create([
@@ -107,7 +107,7 @@ class TradingController extends Controller
             'price_per_share' => $currentPrice,
             'total_amount' => $totalAmount,
             'coin_change' => -$totalAmount,
-            'coin_balance_after' => $newCoinBalance
+            'current_coins_after' => $newCoinBalance
         ]);
 
         // コイン履歴記録
@@ -164,8 +164,8 @@ class TradingController extends Controller
         }
 
         // コイン残高更新
-        $newCoinBalance = $user->coin_balance + $totalAmount;
-        $user->update(['coin_balance' => $newCoinBalance]);
+        $newCoinBalance = $user->current_coins + $totalAmount;
+        $user->update(['current_coins' => $newCoinBalance]);
 
         // 取引履歴記録
         TradeHistory::create([
@@ -176,7 +176,7 @@ class TradingController extends Controller
             'price_per_share' => $currentPrice,
             'total_amount' => $totalAmount,
             'coin_change' => $totalAmount,
-            'coin_balance_after' => $newCoinBalance
+            'current_coins_after' => $newCoinBalance
         ]);
 
         // コイン履歴記録
@@ -236,12 +236,12 @@ class TradingController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'coin_balance' => $user->coin_balance,
+                'current_coins' => $user->current_coins,
                 'total_invested' => $totalInvested,
                 'total_current_value' => $totalCurrentValue,
                 'total_profit_loss' => $totalProfitLoss,
                 'total_profit_loss_percent' => $totalProfitLossPercent,
-                'total_assets' => $user->coin_balance + $totalCurrentValue,
+                'total_assets' => $user->current_coins + $totalCurrentValue,
                 'holdings' => $portfolio
             ]
         ]);
@@ -354,12 +354,12 @@ class TradingController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'coin_balance' => $user->coin_balance,
+                'current_coins' => $user->current_coins,
                 'total_invested' => $totalInvested,
                 'total_current_value' => $totalCurrentValue,
                 'total_profit_loss' => $totalProfitLoss,
                 'total_profit_loss_percent' => $totalProfitLossPercent,
-                'total_assets' => $user->coin_balance + $totalCurrentValue,
+                'total_assets' => $user->current_coins + $totalCurrentValue,
                 'holdings' => $portfolio
             ]
         ]);

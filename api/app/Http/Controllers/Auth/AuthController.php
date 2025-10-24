@@ -32,7 +32,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'coin_balance' => 10000, // 新規ユーザーに10,000コイン付与
+            'current_coins' => 10000, // 新規ユーザーに10,000コイン付与
         ]);
 
         // ログイン状態にする

@@ -19,7 +19,7 @@ class TradeHistory extends Model
         'price_per_share',
         'total_amount',
         'coin_change',
-        'coin_balance_after',
+        'current_coins_after',
         'notes'
     ];
 
@@ -27,7 +27,7 @@ class TradeHistory extends Model
         'price_per_share' => 'decimal:2',
         'total_amount' => 'decimal:2',
         'coin_change' => 'decimal:2',
-        'coin_balance_after' => 'decimal:2',
+        'current_coins_after' => 'decimal:2',
     ];
 
     // リレーション

@@ -107,7 +107,7 @@ export const AuthProvider = ({ children }) => {
     setUser(prevUser => {
       const updated = {
         ...prevUser,
-        coin_balance: newBalance
+        current_coins: newBalance
       };
       // localStorageも更新
       localStorage.setItem('user', JSON.stringify(updated));

@@ -108,12 +108,12 @@ class UserController extends Controller
             return $userStock->stock->current_price * $userStock->quantity;
         });
         
-        $totalAssets = $user->coin_balance + $totalStockValue;
+        $totalAssets = $user->current_coins + $totalStockValue;
         
         return response()->json([
             'success' => true,
             'data' => [
-                'coin_balance' => $user->coin_balance,
+                'current_coins' => $user->current_coins,
                 'stock_value' => $totalStockValue,
                 'total_assets' => $totalAssets,
                 'stock_count' => $userStocks->count()
