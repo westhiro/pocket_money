@@ -202,9 +202,31 @@ class TradingController extends Controller
     }
 
     // ユーザーポートフォリオ取得
-    public function portfolio()
+    public function portfolio(Request $request)
     {
-        $user = Auth::user();
+        // リクエストからuser_idを取得（なければ認証ユーザー）
+        $userId = $request->input('user_id') ?? $request->header('X-User-Id');
+
+        if (!$userId && Auth::check()) {
+            $userId = Auth::id();
+        }
+
+        if (!$userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User ID is required'
+            ], 400);
+        }
+
+        $user = User::find($userId);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
+
         $userStocks = $user->stocks()->with('stock.industry')->get();
 
         $portfolio = $userStocks->map(function ($userStock) {
