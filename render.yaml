@@ -5,6 +5,7 @@ services:
     env: docker
     plan: free
     dockerfilePath: ./api/Dockerfile
+    dockerContext: ./api
     envVars:
       - key: APP_KEY
         generateValue: true
