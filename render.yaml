@@ -26,8 +26,9 @@ services:
         value: database
 
   # React フロントエンド
-  - type: static
+  - type: web
     name: pocket-money-frontend
+    env: static
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     envVars:
