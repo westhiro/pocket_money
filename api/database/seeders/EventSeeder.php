@@ -12,113 +12,122 @@ class EventSeeder extends Seeder
      */
     public function run(): void
     {
-        // イベントデータ
+        // 新しいイベントデータ
         $events = [
             [
-                'title' => '新AI技術発表',
-                'description' => '革新的なAI技術が発表され、関連企業の業績向上が期待される',
-                'event_type' => 'industry',
-                'impact_type' => 'positive',
-                'probability_weight' => 15
-            ],
-            [
-                'title' => 'サイバーセキュリティ事件',
-                'description' => '大規模なサイバー攻撃により、IT業界の信頼性に影響',
-                'event_type' => 'industry',
-                'impact_type' => 'negative',
-                'probability_weight' => 8
-            ],
-            [
-                'title' => '環境規制強化',
-                'description' => '政府が環境規制を強化、製造業のコスト増加が懸念',
-                'event_type' => 'political',
-                'impact_type' => 'negative',
-                'probability_weight' => 12
-            ],
-            [
-                'title' => 'グリーンエネルギー補助金',
-                'description' => '再生可能エネルギー企業への補助金制度が拡充',
-                'event_type' => 'political',
-                'impact_type' => 'positive',
-                'probability_weight' => 10
-            ],
-            [
-                'title' => '金利上昇',
-                'description' => '中央銀行が政策金利を引き上げ、金融業界に影響',
-                'event_type' => 'economic',
-                'impact_type' => 'negative',
-                'probability_weight' => 18
-            ],
-            [
-                'title' => '新薬承認',
-                'description' => '画期的な新薬が薬事承認され、ヘルスケア業界に追い風',
-                'event_type' => 'industry',
-                'impact_type' => 'positive',
-                'probability_weight' => 12
-            ],
-            [
-                'title' => '自然災害発生',
-                'description' => '大規模災害により製造業の生産に影響が発生',
+                'title' => '台風接近',
+                'description' => '停電や配送遅延の懸念が高まる',
                 'event_type' => 'natural_disaster',
                 'impact_type' => 'negative',
-                'probability_weight' => 5
+                'probability_weight' => 20, // 20%の確率で発生
+                'genre' => '災害'
             ],
             [
-                'title' => 'インフラ投資計画',
-                'description' => '政府が大規模インフラ投資を発表、建設・不動産業界に好影響',
-                'event_type' => 'political',
+                'title' => '猛暑到来',
+                'description' => '電力・飲料需要が急増',
+                'event_type' => 'natural_disaster',
                 'impact_type' => 'positive',
-                'probability_weight' => 14
+                'probability_weight' => 20,
+                'genre' => '災害'
             ],
             [
-                'title' => '5G普及加速',
-                'description' => '5G通信網の普及が加速、通信業界の成長期待が高まる',
+                'title' => '大規模ネット障害',
+                'description' => '通信が広範囲でダウン',
                 'event_type' => 'industry',
-                'impact_type' => 'positive',
-                'probability_weight' => 16
+                'impact_type' => 'negative',
+                'probability_weight' => 20,
+                'genre' => '治安'
             ],
             [
-                'title' => '消費税増税',
-                'description' => '消費税増税により消費者の購買力減少、小売業界に悪影響',
+                'title' => '大手との業務提携',
+                'description' => '新サービスを共同開発',
+                'event_type' => 'company',
+                'impact_type' => 'positive',
+                'probability_weight' => 20,
+                'genre' => '社内（企業内イベント）'
+            ],
+            [
+                'title' => '省エネ設備の導入',
+                'description' => '電力使用量の削減に成功',
+                'event_type' => 'company',
+                'impact_type' => 'positive',
+                'probability_weight' => 20,
+                'genre' => '社内（企業内イベント）'
+            ],
+            [
+                'title' => '健康志向ブーム',
+                'description' => '高たんぱく・低糖商品が人気',
+                'event_type' => 'economic',
+                'impact_type' => 'positive',
+                'probability_weight' => 20,
+                'genre' => '世の中（トレンド・景気・生活）'
+            ],
+            [
+                'title' => '送料値上げ',
+                'description' => 'ネット通販に逆風',
                 'event_type' => 'economic',
                 'impact_type' => 'negative',
-                'probability_weight' => 8
+                'probability_weight' => 20,
+                'genre' => '世の中（トレンド・景気・生活）'
+            ],
+            [
+                'title' => 'インフラ投資計画発表',
+                'description' => '公共工事の見通しが改善',
+                'event_type' => 'political',
+                'impact_type' => 'positive',
+                'probability_weight' => 20,
+                'genre' => '政治（政策・規制・金利）'
+            ],
+            [
+                'title' => '通信・プライバシー規制',
+                'description' => '広告やトラッキングの制限が強化',
+                'event_type' => 'political',
+                'impact_type' => 'negative',
+                'probability_weight' => 20,
+                'genre' => '政治（政策・規制・金利）'
             ]
         ];
 
-        // イベント影響データ（業界別）
+        // イベント影響データ（業界ID対応）
+        // 1: エネルギー, 2: 原材料（素材）, 3: 機械・プラント, 4: 日常の楽しみ・便利サービス
+        // 5: 食品・日用品, 6: 医療・健康サービス, 7: 銀行・保険などお金の仕事
+        // 8: スマホ・パソコン関連, 9: SNS・動画サイトなど通信, 10: 電気・ガス・水道など公益, 11: ビル・土地の運営
         $eventImpacts = [
-            // 新AI技術発表 → テクノロジー業界に+20%
-            ['event_id' => 1, 'target_type' => 'industry', 'target_id' => 1, 'impact_percentage' => 20.0],
-            
-            // サイバーセキュリティ事件 → テクノロジー業界に-12%
-            ['event_id' => 2, 'target_type' => 'industry', 'target_id' => 1, 'impact_percentage' => -12.0],
-            
-            // 環境規制強化 → 製造業に-15%
-            ['event_id' => 3, 'target_type' => 'industry', 'target_id' => 2, 'impact_percentage' => -15.0],
-            
-            // グリーンエネルギー補助金 → エネルギー業界に+25%
-            ['event_id' => 4, 'target_type' => 'industry', 'target_id' => 5, 'impact_percentage' => 25.0],
-            
-            // 金利上昇 → 金融業界に-8%, 不動産業界に-18%
-            ['event_id' => 5, 'target_type' => 'industry', 'target_id' => 3, 'impact_percentage' => -8.0],
-            ['event_id' => 5, 'target_type' => 'industry', 'target_id' => 7, 'impact_percentage' => -18.0],
-            
-            // 新薬承認 → ヘルスケア業界に+30%
-            ['event_id' => 6, 'target_type' => 'industry', 'target_id' => 4, 'impact_percentage' => 30.0],
-            
-            // 自然災害 → 製造業に-20%, エネルギー業界に-10%
-            ['event_id' => 7, 'target_type' => 'industry', 'target_id' => 2, 'impact_percentage' => -20.0],
-            ['event_id' => 7, 'target_type' => 'industry', 'target_id' => 5, 'impact_percentage' => -10.0],
-            
-            // インフラ投資 → 不動産業界に+22%
-            ['event_id' => 8, 'target_type' => 'industry', 'target_id' => 7, 'impact_percentage' => 22.0],
-            
-            // 5G普及 → 通信業界に+28%
-            ['event_id' => 9, 'target_type' => 'industry', 'target_id' => 8, 'impact_percentage' => 28.0],
-            
-            // 消費税増税 → 小売業界に-14%
-            ['event_id' => 10, 'target_type' => 'industry', 'target_id' => 6, 'impact_percentage' => -14.0]
+            // 1. 台風接近 → 電気・ガス・水道など公益(10), 日常の楽しみ・便利サービス(4)
+            ['event_id' => 1, 'target_type' => 'industry', 'target_id' => 10, 'impact_percentage' => rand(-5, -1)],
+            ['event_id' => 1, 'target_type' => 'industry', 'target_id' => 4, 'impact_percentage' => rand(-5, -1)],
+
+            // 2. 猛暑到来 → 電気・ガス・水道など公益(10), 食品・日用品(5)
+            ['event_id' => 2, 'target_type' => 'industry', 'target_id' => 10, 'impact_percentage' => rand(1, 5)],
+            ['event_id' => 2, 'target_type' => 'industry', 'target_id' => 5, 'impact_percentage' => rand(1, 5)],
+
+            // 3. 大規模ネット障害 → SNS・動画サイトなど通信(9)
+            ['event_id' => 3, 'target_type' => 'industry', 'target_id' => 9, 'impact_percentage' => rand(-5, -1)],
+
+            // 4. 大手との業務提携 → スマホ・パソコン関連(8), 日常の楽しみ・便利サービス(4), 医療・健康サービス(6)
+            ['event_id' => 4, 'target_type' => 'industry', 'target_id' => 8, 'impact_percentage' => rand(1, 5)],
+            ['event_id' => 4, 'target_type' => 'industry', 'target_id' => 4, 'impact_percentage' => rand(1, 5)],
+            ['event_id' => 4, 'target_type' => 'industry', 'target_id' => 6, 'impact_percentage' => rand(1, 5)],
+
+            // 5. 省エネ設備の導入 → エネルギー(1), 機械・プラント(3)
+            ['event_id' => 5, 'target_type' => 'industry', 'target_id' => 1, 'impact_percentage' => rand(1, 5)],
+            ['event_id' => 5, 'target_type' => 'industry', 'target_id' => 3, 'impact_percentage' => rand(1, 5)],
+
+            // 6. 健康志向ブーム → 食品・日用品(5), 医療・健康サービス(6)
+            ['event_id' => 6, 'target_type' => 'industry', 'target_id' => 5, 'impact_percentage' => rand(1, 5)],
+            ['event_id' => 6, 'target_type' => 'industry', 'target_id' => 6, 'impact_percentage' => rand(1, 5)],
+
+            // 7. 送料値上げ → 日常の楽しみ・便利サービス(4)
+            ['event_id' => 7, 'target_type' => 'industry', 'target_id' => 4, 'impact_percentage' => rand(-5, -1)],
+
+            // 8. インフラ投資計画発表 → ビル・土地の運営(11), 機械・プラント(3), 原材料（素材）(2)
+            ['event_id' => 8, 'target_type' => 'industry', 'target_id' => 11, 'impact_percentage' => rand(1, 5)],
+            ['event_id' => 8, 'target_type' => 'industry', 'target_id' => 3, 'impact_percentage' => rand(1, 5)],
+            ['event_id' => 8, 'target_type' => 'industry', 'target_id' => 2, 'impact_percentage' => rand(1, 5)],
+
+            // 9. 通信・プライバシー規制 → SNS・動画サイトなど通信(9), スマホ・パソコン関連(8)
+            ['event_id' => 9, 'target_type' => 'industry', 'target_id' => 9, 'impact_percentage' => rand(-5, -1)],
+            ['event_id' => 9, 'target_type' => 'industry', 'target_id' => 8, 'impact_percentage' => rand(-5, -1)]
         ];
 
         // イベント挿入
@@ -130,7 +139,7 @@ class EventSeeder extends Seeder
                 'event_type' => $event['event_type'],
                 'impact_type' => $event['impact_type'],
                 'probability_weight' => $event['probability_weight'],
-                'impact_percentage' => 10.0, // デフォルトの影響率
+                'impact_percentage' => 0.00, // デフォルト値（実際の影響はevent_impactsテーブルで管理）
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),

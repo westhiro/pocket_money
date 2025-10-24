@@ -9,90 +9,68 @@ use Carbon\Carbon;
 
 class UpdateStockPrices extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'stocks:update-prices {--force : 強制的に価格を更新する}';
+    protected $description = '1時間ごとに株価をランダムに更新する（新システム）';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = '一日一回、株価をランダムに更新する';
-
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
         $this->info('株価更新処理を開始します...');
-        
+
         $force = $this->option('force');
-        $today = Carbon::today();
-        
-        // 今日既に更新されているかチェック（force オプションでスキップ可能）
+        $now = Carbon::now();
+
+        // 今回の更新時刻（分・秒を00に丸める）
+        $updateTime = $now->copy()->setMinute(0)->setSecond(0);
+
+        // 今時間既に更新されているかチェック（force オプションでスキップ可能）
         if (!$force) {
-            $alreadyUpdatedToday = Stock::whereDate('last_updated_at', $today)->exists();
-            if ($alreadyUpdatedToday) {
-                $this->warn('今日は既に株価が更新されています。強制更新するには --force オプションを使用してください。');
+            $alreadyUpdated = StockPriceHistory::where('recorded_at', $updateTime)->exists();
+            if ($alreadyUpdated) {
+                $this->warn('この時間は既に株価が更新されています。強制更新するには --force オプションを使用してください。');
                 return 0;
             }
         }
-        
-        // イベント発生判定を実行
-        $triggeredEvents = $this->checkForEvents();
-        
+
+        // 1. 緊急イベント発生判定（20%の確率）
+        $emergencyEvent = $this->checkForEmergencyEvent();
+
+        // 2. 全株式を取得して更新
         $stocks = Stock::all();
         $updatedCount = 0;
-        
+
         foreach ($stocks as $stock) {
-            $this->updateStockPrice($stock, $triggeredEvents);
+            $this->updateStockPrice($stock, $emergencyEvent, $updateTime);
             $updatedCount++;
-            
-            $this->info("[{$updatedCount}/{$stocks->count()}] {$stock->company_name}: {$stock->current_price}円");
+
+            $trendEmoji = $stock->current_trend === 'upward' ? '📈' : '📉';
+            $this->info("[{$updatedCount}/{$stocks->count()}] {$stock->company_name}: {$stock->current_price}円 {$trendEmoji}");
         }
-        
+
         // イベントが発生した場合の報告
-        if (!empty($triggeredEvents)) {
-            $this->info("\n📰 今日発生したイベント:");
-            foreach ($triggeredEvents as $event) {
-                $this->info("- {$event['title']}: {$event['description']}");
-            }
+        if ($emergencyEvent) {
+            $this->info("\n🚨 緊急イベント発生!");
+            $this->info("- {$emergencyEvent['title']}: {$emergencyEvent['description']}");
         }
-        
-        $this->info("株価更新完了！ {$updatedCount}社の株価を更新しました。");
+
+        $this->info("\n株価更新完了！ {$updatedCount}社の株価を更新しました。");
         return 0;
     }
-    
+
     /**
-     * イベント発生判定
+     * 緊急イベント発生判定（20%の確率）
      */
-    private function checkForEvents()
+    private function checkForEmergencyEvent()
     {
-        $triggeredEvents = [];
-        
-        // 全ての有効なイベントを取得
-        $events = \DB::table('events')->where('is_active', true)->get();
-        
-        foreach ($events as $event) {
-            // 確率判定（probability_weightが発生確率%）
-            $randomValue = rand(1, 100);
-            
-            if ($randomValue <= $event->probability_weight) {
-                $triggeredEvents[] = [
-                    'id' => $event->id,
-                    'title' => $event->title,
-                    'description' => $event->description,
-                    'event_type' => $event->event_type,
-                    'impact_type' => $event->impact_type
-                ];
-                
+        $randomValue = rand(1, 100);
+
+        if ($randomValue <= 20) { // 20%の確率
+            // 全ての有効なイベントからランダムに1つ選択
+            $event = \DB::table('events')->where('is_active', true)->inRandomOrder()->first();
+
+            if ($event) {
                 // ニュースとして記録
                 \DB::table('news')->insert([
-                    'title' => $event->title,
+                    'title' => '🚨 緊急速報: ' . $event->title,
                     'content' => $event->description,
                     'news_type' => $event->impact_type === 'positive' ? 'good' : 'bad',
                     'is_published' => true,
@@ -100,133 +78,277 @@ class UpdateStockPrices extends Command
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
-                
-                $this->info("🎲 イベント発生: {$event->title} (確率: {$event->probability_weight}%)");
+
+                return [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'description' => $event->description,
+                    'event_type' => $event->event_type,
+                    'impact_type' => $event->impact_type
+                ];
             }
         }
-        
-        return $triggeredEvents;
+
+        return null;
     }
-    
-    private function updateStockPrice(Stock $stock, $triggeredEvents = [])
+
+    /**
+     * 個別株価を更新
+     */
+    private function updateStockPrice(Stock $stock, $emergencyEvent, $updateTime)
     {
-        // 最新の履歴データを取得して、それを基準に価格を設定
-        $latestHistory = $stock->priceHistory()->latest('recorded_at')->first();
-        
-        if ($latestHistory) {
-            // 履歴データが存在する場合、最新履歴を現在価格として使用
-            $currentPrice = (float) $latestHistory->price;
-            
-            // 現在価格を履歴の最新価格に同期
-            if ($stock->current_price != $currentPrice) {
-                $stock->update(['current_price' => $currentPrice]);
-            }
-        } else {
-            $currentPrice = (float) $stock->current_price;
+        $currentPrice = (float) $stock->current_price;
+        $changePercentage = 0;
+
+        // 緊急イベント中または回復中の株をチェック
+        if ($stock->in_emergency_event) {
+            // 緊急イベント終了処理
+            $this->handleEventRecovery($stock, $currentPrice, $updateTime);
+            return;
         }
-        
-        // 最小値・最大値を現在価格の適切な範囲に設定
-        $stock->update([
-            'min_price' => $currentPrice * 0.6,  // 現在価格の60%
-            'max_price' => $currentPrice * 1.4   // 現在価格の140%
-        ]);
-        
-        // 基本変動率を計算（通常の±3%）
-        $baseChangePercentage = (rand(-300, 300) / 100); // -3.00 to +3.00
-        
-        // イベント影響を計算
-        $eventImpact = $this->calculateEventImpact($stock, $triggeredEvents);
-        
-        // 最終的な変動率 = 基本変動 + イベント影響
-        $totalChangePercentage = $baseChangePercentage + $eventImpact;
-        
-        // 新価格を計算
-        $newPrice = $currentPrice * (1 + ($totalChangePercentage / 100));
-        
-        // イベント影響があった場合の表示
-        if ($eventImpact != 0) {
-            $this->info("  💥 イベント影響: {$eventImpact}% (基本: {$baseChangePercentage}% + イベント: {$eventImpact}%)");
+
+        if ($stock->needs_event_recovery) {
+            // イベント後の回復処理
+            $this->handlePostEventRecovery($stock, $currentPrice, $updateTime);
+            return;
         }
-        
-        // 最小値・最大値の範囲内に制限
-        $newPrice = max($stock->min_price, min($stock->max_price, $newPrice));
+
+        // 緊急イベントが発生し、この株が影響を受けるか確認
+        if ($emergencyEvent && $this->isStockAffectedByEvent($stock, $emergencyEvent)) {
+            $this->handleEmergencyEvent($stock, $emergencyEvent, $currentPrice, $updateTime);
+            return;
+        }
+
+        // 通常時の処理
+        $this->handleNormalUpdate($stock, $currentPrice, $updateTime);
+    }
+
+    /**
+     * 緊急イベントの影響を受けるか判定
+     */
+    private function isStockAffectedByEvent($stock, $event)
+    {
+        $impact = \DB::table('event_impacts')
+            ->where('event_id', $event['id'])
+            ->where('target_type', 'industry')
+            ->where('target_id', $stock->industry_id)
+            ->first();
+
+        return $impact !== null;
+    }
+
+    /**
+     * 緊急イベント処理
+     */
+    private function handleEmergencyEvent($stock, $event, $currentPrice, $updateTime)
+    {
+        // イベント影響を取得
+        $impact = \DB::table('event_impacts')
+            ->where('event_id', $event['id'])
+            ->where('target_type', 'industry')
+            ->where('target_id', $stock->industry_id)
+            ->first();
+
+        if (!$impact) return;
+
+        $changePercentage = $impact->impact_percentage;
+        $newPrice = $currentPrice * (1 + ($changePercentage / 100));
         $newPrice = round($newPrice, 2);
-        
-        // 実際の変動率を再計算
-        $actualChangePercentage = $currentPrice > 0 ? (($newPrice - $currentPrice) / $currentPrice) * 100 : 0;
-        
-        // 株価履歴に記録（今日15:00のタイムスタンプで統一）
-        $today = now()->setTime(15, 0, 0);
-        
-        // 今日既に履歴があるかチェック
-        $existingToday = $stock->priceHistory()->whereDate('recorded_at', $today)->first();
-        
-        if (!$existingToday) {
-            StockPriceHistory::create([
-                'stock_id' => $stock->id,
-                'price' => $newPrice,
-                'change_percentage' => round($actualChangePercentage, 2),
-                'recorded_at' => $today
-            ]);
-        } else {
-            // 今日の履歴が既に存在する場合は更新
-            $existingToday->update([
-                'price' => $newPrice,
-                'change_percentage' => round($actualChangePercentage, 2)
-            ]);
-        }
-        
-        // 株価を更新
+
+        // 株価履歴に記録
+        StockPriceHistory::create([
+            'stock_id' => $stock->id,
+            'price' => $newPrice,
+            'change_percentage' => round($changePercentage, 2),
+            'recorded_at' => $updateTime
+        ]);
+
+        // 4%以上の変動があった場合、次回調整が必要
+        $needsCorrection = abs($changePercentage) >= 4.0;
+
         $stock->update([
             'current_price' => $newPrice,
+            'last_change_percentage' => $changePercentage,
+            'in_emergency_event' => true,
+            'needs_event_recovery' => $needsCorrection,
+            'last_updated_at' => now()
+        ]);
+
+        $this->info("  🚨 {$stock->company_name} がイベント影響: {$changePercentage}%");
+    }
+
+    /**
+     * イベント終了処理（イベント発生から1時間後）
+     */
+    private function handleEventRecovery($stock, $currentPrice, $updateTime)
+    {
+        // イベント終了後の変動: -3%〜+5%
+        $recoveryChange = (rand(-300, 500) / 100);
+        $newPrice = $currentPrice * (1 + ($recoveryChange / 100));
+        $newPrice = round($newPrice, 2);
+
+        StockPriceHistory::create([
+            'stock_id' => $stock->id,
+            'price' => $newPrice,
+            'change_percentage' => round($recoveryChange, 2),
+            'recorded_at' => $updateTime
+        ]);
+
+        $stock->update([
+            'current_price' => $newPrice,
+            'last_change_percentage' => $recoveryChange,
+            'in_emergency_event' => false,
+            'last_updated_at' => now()
+        ]);
+
+        $this->info("  🔄 {$stock->company_name} イベント終了: {$recoveryChange}%");
+    }
+
+    /**
+     * イベント後の調整処理（4%以上変動した翌時間に1%戻る）
+     */
+    private function handlePostEventRecovery($stock, $currentPrice, $updateTime)
+    {
+        // 1%戻る
+        $correctionChange = $stock->last_change_percentage > 0 ? -1.0 : 1.0;
+        $newPrice = $currentPrice * (1 + ($correctionChange / 100));
+        $newPrice = round($newPrice, 2);
+
+        StockPriceHistory::create([
+            'stock_id' => $stock->id,
+            'price' => $newPrice,
+            'change_percentage' => round($correctionChange, 2),
+            'recorded_at' => $updateTime
+        ]);
+
+        $stock->update([
+            'current_price' => $newPrice,
+            'last_change_percentage' => $correctionChange,
+            'needs_event_recovery' => false,
+            'needs_correction' => false,
+            'last_updated_at' => now()
+        ]);
+
+        $this->info("  ↩️  {$stock->company_name} 調整: {$correctionChange}%");
+    }
+
+    /**
+     * 通常時の株価更新
+     */
+    private function handleNormalUpdate($stock, $currentPrice, $updateTime)
+    {
+        // 前回の変動で調整が必要な場合
+        if ($stock->needs_correction) {
+            $this->handleCorrection($stock, $currentPrice, $updateTime);
+            return;
+        }
+
+        // 50%の確率でトレンドを変更
+        if (rand(1, 100) <= 50) {
+            $newTrend = $stock->current_trend === 'upward' ? 'downward' : 'upward';
+            $stock->update([
+                'current_trend' => $newTrend,
+                'trend_updated_at' => now()
+            ]);
+
+            // トレンド変更のニュースを作成
+            $this->createTrendNews($stock, $newTrend);
+        }
+
+        // トレンドに基づいた変動
+        if ($stock->current_trend === 'upward') {
+            // 上昇傾向: +0.5%〜+1.5%
+            $changePercentage = (rand(50, 150) / 100);
+        } else {
+            // 減少傾向: -0.5%〜-1.5%
+            $changePercentage = (rand(-150, -50) / 100);
+        }
+
+        $newPrice = $currentPrice * (1 + ($changePercentage / 100));
+        $newPrice = round($newPrice, 2);
+
+        // 株価履歴に記録
+        StockPriceHistory::create([
+            'stock_id' => $stock->id,
+            'price' => $newPrice,
+            'change_percentage' => round($changePercentage, 2),
+            'recorded_at' => $updateTime
+        ]);
+
+        // 1.0%を超える変動があった場合、次回調整が必要
+        $needsCorrection = abs($changePercentage) > 1.0;
+
+        $stock->update([
+            'current_price' => $newPrice,
+            'last_change_percentage' => $changePercentage,
+            'needs_correction' => $needsCorrection,
             'last_updated_at' => now()
         ]);
     }
-    
+
     /**
-     * イベントが株価に与える影響を計算
+     * 調整処理（1.0%を超える変動の翌時間）
      */
-    private function calculateEventImpact(Stock $stock, $triggeredEvents)
+    private function handleCorrection($stock, $currentPrice, $updateTime)
     {
-        $totalImpact = 0.0;
-        
-        foreach ($triggeredEvents as $event) {
-            // このイベントがこの株式に影響するかチェック
-            $impacts = \DB::table('event_impacts')
-                ->where('event_id', $event['id'])
-                ->get();
-            
-            foreach ($impacts as $impact) {
-                $isAffected = false;
-                $impactPercentage = 0.0;
-                
-                if ($impact->target_type === 'industry') {
-                    // 業界への影響
-                    if ($stock->industry_id == $impact->target_id) {
-                        $isAffected = true;
-                        $impactPercentage = $impact->impact_percentage;
-                    }
-                } elseif ($impact->target_type === 'stock') {
-                    // 個別株式への影響
-                    if ($stock->id == $impact->target_id) {
-                        $isAffected = true;
-                        $impactPercentage = $impact->impact_percentage;
-                    }
-                }
-                
-                if ($isAffected) {
-                    $totalImpact += $impactPercentage;
-                    
-                    // 業界名を取得して表示
-                    if ($impact->target_type === 'industry') {
-                        $industry = \DB::table('industries')->where('id', $impact->target_id)->first();
-                        $industryName = $industry ? $industry->name : "不明";
-                        $this->info("  📈 {$stock->company_name}が{$event['title']}の影響を受けます（{$industryName}業界: {$impactPercentage}%）");
-                    }
-                }
-            }
+        if ($stock->current_trend === 'upward' && $stock->last_change_percentage > 1.0) {
+            // 上昇時の調整: -0.1%〜-0.3%
+            $changePercentage = (rand(-30, -10) / 100);
+        } elseif ($stock->current_trend === 'downward' && $stock->last_change_percentage < -1.0) {
+            // 下落時の調整: +0.05%〜+0.3%
+            $changePercentage = (rand(5, 30) / 100);
+        } else {
+            // 通常の変動に戻る
+            $this->handleNormalUpdate($stock, $currentPrice, $updateTime);
+            return;
         }
-        
-        return $totalImpact;
+
+        $newPrice = $currentPrice * (1 + ($changePercentage / 100));
+        $newPrice = round($newPrice, 2);
+
+        StockPriceHistory::create([
+            'stock_id' => $stock->id,
+            'price' => $newPrice,
+            'change_percentage' => round($changePercentage, 2),
+            'recorded_at' => $updateTime
+        ]);
+
+        $stock->update([
+            'current_price' => $newPrice,
+            'last_change_percentage' => $changePercentage,
+            'needs_correction' => false,
+            'last_updated_at' => now()
+        ]);
+
+        $this->info("  ⚖️  {$stock->company_name} 調整: {$changePercentage}%");
+    }
+
+    /**
+     * トレンド変更ニュース作成
+     */
+    private function createTrendNews($stock, $newTrend)
+    {
+        $industry = \DB::table('industries')->where('id', $stock->industry_id)->first();
+        $industryName = $industry ? $industry->name : '不明';
+
+        if ($newTrend === 'upward') {
+            $title = "📈 {$stock->company_name}が上昇トレンドに";
+            $content = "{$industryName}業界の{$stock->company_name}が上昇傾向に転じました。今後の成長が期待されます。";
+            $newsType = 'good';
+        } else {
+            $title = "📉 {$stock->company_name}が下降トレンドに";
+            $content = "{$industryName}業界の{$stock->company_name}が下降傾向に転じました。市場の動向に注意が必要です。";
+            $newsType = 'bad';
+        }
+
+        \DB::table('news')->insert([
+            'title' => $title,
+            'content' => $content,
+            'news_type' => $newsType,
+            'is_published' => true,
+            'published_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
     }
 }

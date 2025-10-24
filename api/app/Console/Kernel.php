@@ -25,13 +25,19 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // 毎日15:00に株価を更新
+        // 1時間ごとに株価を更新
         $schedule->command('stocks:update-prices')
-                ->dailyAt('15:00')
+                ->hourly()
                 ->timezone('Asia/Tokyo')
                 ->withoutOverlapping()
                 ->runInBackground()
                 ->appendOutputTo(storage_path('logs/stock-update.log'));
+
+        // 毎日深夜2時に古い株価データを削除（61日以上前のデータ）
+        $schedule->command('stocks:clean-old-prices')
+                ->dailyAt('02:00')
+                ->timezone('Asia/Tokyo')
+                ->appendOutputTo(storage_path('logs/stock-cleanup.log'));
     }
 
     /**

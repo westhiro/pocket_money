@@ -110,7 +110,7 @@ class StockController extends Controller
     public function chart($id, $period)
     {
         $stock = Stock::find($id);
-        
+
         if (!$stock) {
             return response()->json([
                 'success' => false,
@@ -118,52 +118,35 @@ class StockController extends Controller
             ], 404);
         }
 
-        // 期間別の設定：[取得日数, 表示ポイント数, 間隔（日）]
+        // 期間別の設定：日数ベースでデータポイント数を決定
         $periodConfig = [
-            '1w' => ['days' => 7, 'points' => 7, 'interval' => 1],      // 1週間：7日分、7ポイント、1日間隔
-            '1m' => ['days' => 30, 'points' => 30, 'interval' => 1],    // 1ヶ月：30日分、30ポイント、1日間隔
-            '1y' => ['days' => 365, 'points' => 12, 'interval' => 30]   // 1年：365日分、12ポイント、30日間隔（月次）
+            '1w' => 7,       // 1週間：7日分
+            '2w' => 15,      // 半月（2週間）：15日分
+            '1m' => 30       // 1ヶ月：30日分
         ];
 
-        $config = $periodConfig[$period] ?? $periodConfig['1m'];
-        $days = $config['days'];
-        $targetPoints = $config['points'];
-        $interval = $config['interval'];
+        $days = $periodConfig[$period] ?? $periodConfig['1m'];
+        $hoursNeeded = $days * 24; // 必要な時間数
 
-        // 全データから指定日数分を取得
+        // 指定期間分の全データを取得
         $allData = $stock->priceHistory()
             ->orderBy('recorded_at', 'desc')
-            ->take($days)
+            ->take($hoursNeeded)
             ->get()
             ->reverse()  // 古い順に並び替え
             ->values();  // インデックスをリセット
 
-        // 期間に応じてデータを間引く
+        // 1日ごとにデータを間引く（24時間ごとに1ポイント）
         $chartData = collect();
-        if ($period === '1y') {
-            // 1年の場合：月次データを取得（約30日間隔）
-            for ($i = 0; $i < $targetPoints && $i * $interval < $allData->count(); $i++) {
-                $index = $i * $interval;
-                if ($index < $allData->count()) {
-                    $chartData->push($allData[$index]);
-                }
+        for ($i = 0; $i < $allData->count(); $i += 24) {
+            if (isset($allData[$i])) {
+                $chartData->push($allData[$i]);
             }
-            
-            // 最新のデータを必ず含める
-            if ($allData->count() > 0) {
-                $latestData = $allData->last();
-                if (!$chartData->contains('recorded_at', $latestData->recorded_at)) {
-                    $chartData->push($latestData);
-                }
-            }
-        } else {
-            // 1週間・1ヶ月の場合：全データをそのまま使用
-            $chartData = $allData;
         }
 
         // データをフォーマット
         $formattedData = $chartData->map(function ($history) use ($period) {
-            $dateFormat = $period === '1w' ? 'Y-m-d H:i' : 'Y-m-d';
+            $dateFormat = $period === '1w' ? 'Y-m-d' : 'Y-m-d';
             return [
                 'date' => $history->recorded_at->format($dateFormat),
                 'price' => (float) $history->price,

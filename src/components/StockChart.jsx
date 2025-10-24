@@ -62,8 +62,8 @@ const StockChart = ({ stock, onBuy, onSell }) => {
   // 期間表示名のマッピング
   const periodNames = {
     '1w': '1週間',
-    '1m': '1ヶ月', 
-    '1y': '1年'
+    '2w': '半月',
+    '1m': '1ヶ月'
   }
 
   const handlePeriodChange = (period) => {
