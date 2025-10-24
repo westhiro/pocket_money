@@ -16,6 +16,27 @@ const api = axios.create({
   withCredentials: true, // セッション認証のため
 });
 
+// リクエストインターセプター（ユーザーIDをヘッダーに追加）
+api.interceptors.request.use(
+  (config) => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user && user.id) {
+          config.headers['X-User-Id'] = user.id;
+        }
+      } catch (error) {
+        console.error('Failed to parse user from localStorage:', error);
+      }
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // レスポンスインターセプター
 api.interceptors.response.use(
   (response) => response,

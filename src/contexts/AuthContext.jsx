@@ -16,20 +16,19 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // 初回ローディング時にCSRFトークンを取得してユーザー情報を取得
+  // 初回ローディング時にlocalStorageからユーザー情報を取得
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuth = () => {
       try {
-        // CSRFトークンを先に取得
-        await getCSRFToken();
-        
-        const response = await authAPI.getMe();
-        if (response.data.success) {
-          setUser(response.data.data);
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
           setIsAuthenticated(true);
         }
       } catch (error) {
         console.log('Not authenticated');
+        localStorage.removeItem('user');
         setUser(null);
         setIsAuthenticated(false);
       } finally {
@@ -43,13 +42,13 @@ export const AuthProvider = ({ children }) => {
   // ログイン
   const login = async (credentials) => {
     try {
-      // ログイン前にCSRFトークンを取得
-      await getCSRFToken();
-      
       const response = await authAPI.login(credentials);
       if (response.data.success) {
-        setUser(response.data.data.user);
+        const userData = response.data.data.user;
+        setUser(userData);
         setIsAuthenticated(true);
+        // localStorageに保存
+        localStorage.setItem('user', JSON.stringify(userData));
         return { success: true, message: response.data.message };
       }
     } catch (error) {
@@ -61,13 +60,13 @@ export const AuthProvider = ({ children }) => {
   // 新規登録
   const register = async (userData) => {
     try {
-      // 新規登録前にCSRFトークンを取得
-      await getCSRFToken();
-      
       const response = await authAPI.register(userData);
       if (response.data.success) {
-        setUser(response.data.data.user);
+        const newUser = response.data.data.user;
+        setUser(newUser);
         setIsAuthenticated(true);
+        // localStorageに保存
+        localStorage.setItem('user', JSON.stringify(newUser));
         return { success: true, message: response.data.message };
       }
     } catch (error) {
@@ -83,6 +82,8 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      // localStorageから削除
+      localStorage.removeItem('user');
       setUser(null);
       setIsAuthenticated(false);
     }
@@ -90,18 +91,28 @@ export const AuthProvider = ({ children }) => {
 
   // ユーザー情報を更新
   const updateUser = (updatedUserData) => {
-    setUser(prevUser => ({
-      ...prevUser,
-      ...updatedUserData
-    }));
+    setUser(prevUser => {
+      const updated = {
+        ...prevUser,
+        ...updatedUserData
+      };
+      // localStorageも更新
+      localStorage.setItem('user', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   // コイン残高を更新
   const updateCoinBalance = (newBalance) => {
-    setUser(prevUser => ({
-      ...prevUser,
-      coin_balance: newBalance
-    }));
+    setUser(prevUser => {
+      const updated = {
+        ...prevUser,
+        coin_balance: newBalance
+      };
+      // localStorageも更新
+      localStorage.setItem('user', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const value = {

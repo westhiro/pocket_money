@@ -11,23 +11,29 @@ use App\Models\Stock;
 class UserController extends Controller
 {
     // ユーザーの保有株式を取得
-    public function getStocks()
+    public function getStocks(Request $request)
     {
-        $user = Auth::user();
-        
-        // デバッグログ
-        \Log::info('getStocks called', [
-            'authenticated' => Auth::check(),
-            'user' => $user ? $user->toArray() : null,
-            'session_id' => session()->getId(),
-            'csrf_token' => csrf_token()
-        ]);
-        
+        // リクエストからuser_idを取得（なければ認証ユーザー）
+        $userId = $request->input('user_id') ?? $request->header('X-User-Id');
+
+        if (!$userId && Auth::check()) {
+            $userId = Auth::id();
+        }
+
+        if (!$userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User ID is required'
+            ], 400);
+        }
+
+        $user = \App\Models\User::find($userId);
+
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'User not authenticated'
-            ], 401);
+                'message' => 'User not found'
+            ], 404);
         }
         
         $userStocks = UserStock::where('user_id', $user->id)
@@ -67,9 +73,30 @@ class UserController extends Controller
     }
     
     // ユーザーの資産情報を取得
-    public function getAssets()
+    public function getAssets(Request $request)
     {
-        $user = Auth::user();
+        // リクエストからuser_idを取得（なければ認証ユーザー）
+        $userId = $request->input('user_id') ?? $request->header('X-User-Id');
+
+        if (!$userId && Auth::check()) {
+            $userId = Auth::id();
+        }
+
+        if (!$userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User ID is required'
+            ], 400);
+        }
+
+        $user = \App\Models\User::find($userId);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
         
         // 保有株式の合計価値を計算
         $userStocks = UserStock::where('user_id', $user->id)

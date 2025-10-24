@@ -14,25 +14,25 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
-// 認証が必要なAPI
-Route::middleware('auth:web')->group(function () {
-    Route::get('/user', [AuthController::class, 'me']);
-    Route::post('/auth/logout', [AuthController::class, 'logout']);
-    
-    // ユーザー関連API  
-    Route::prefix('user')->group(function () {
-        Route::get('/assets', [UserController::class, 'getAssets']);
-        Route::get('/stocks', [UserController::class, 'getStocks']);
-        Route::post('/stocks/buy', [UserController::class, 'buyStock']);
-        Route::post('/stocks/sell', [UserController::class, 'sellStock']);
-    });
+// ユーザー関連API（認証不要 - user_idベース）
+Route::prefix('user')->group(function () {
+    Route::get('/assets', [UserController::class, 'getAssets']);
+    Route::get('/stocks', [UserController::class, 'getStocks']);
+    Route::post('/stocks/buy', [UserController::class, 'buyStock']);
+    Route::post('/stocks/sell', [UserController::class, 'sellStock']);
+});
 
-    // 投資取引API
-    Route::prefix('trading')->group(function () {
-        Route::post('/trade', [TradingController::class, 'trade']); // 株式売買
-        Route::get('/portfolio', [TradingController::class, 'portfolio']); // ポートフォリオ取得
-        Route::get('/history', [TradingController::class, 'history']); // 取引履歴
-    });
+// 投資取引API（認証不要 - user_idベース）
+Route::prefix('trading')->group(function () {
+    Route::post('/trade', [TradingController::class, 'trade']); // 株式売買
+    Route::get('/portfolio', [TradingController::class, 'portfolio']); // ポートフォリオ取得
+    Route::get('/history', [TradingController::class, 'history']); // 取引履歴
+});
+
+// 認証が必要なAPI（後方互換性のため残す）
+Route::middleware('auth:web')->group(function () {
+    Route::get('/user-me', [AuthController::class, 'me']);
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
 });
 
 // 株式関連API（認証不要）
