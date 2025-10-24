@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         Commands\UpdateStockPrices::class,
         Commands\GenerateStockHistory::class,
+        Commands\CleanOldNews::class,
     ];
 
     /**
@@ -38,6 +39,12 @@ class Kernel extends ConsoleKernel
                 ->dailyAt('02:00')
                 ->timezone('Asia/Tokyo')
                 ->appendOutputTo(storage_path('logs/stock-cleanup.log'));
+
+        // 毎日深夜3時に古いニュースを削除（7日以上前のニュース）
+        $schedule->command('news:clean-old', ['--days' => 7])
+                ->dailyAt('03:00')
+                ->timezone('Asia/Tokyo')
+                ->appendOutputTo(storage_path('logs/news-cleanup.log'));
     }
 
     /**

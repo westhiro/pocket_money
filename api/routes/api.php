@@ -57,6 +57,32 @@ Route::prefix('test')->group(function () {
     Route::get('/portfolio/{userId}', [TradingController::class, 'portfolioTest']); // テスト用ポートフォリオ
 });
 
+// 株価更新トリガー（外部Cron用）
+Route::get('/trigger-update', function () {
+    try {
+        \Log::info('株価更新トリガーが呼ばれました');
+
+        // 株価更新コマンドを実行
+        \Artisan::call('stocks:update-prices', ['--force' => true]);
+        $output = \Artisan::output();
+
+        \Log::info('株価更新完了: ' . $output);
+
+        return response()->json([
+            'success' => true,
+            'message' => '株価更新が完了しました',
+            'timestamp' => now()->toDateTimeString(),
+            'output' => $output
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('株価更新エラー: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ], 500);
+    }
+});
+
 // CSRFトークン取得エンドポイント
 Route::get('/csrf-token', function () {
     try {

@@ -2,10 +2,9 @@ services:
   # Laravelバックエンド
   - type: web
     name: pocket-money-api
-    runtime: php
+    env: docker
     plan: free
-    buildCommand: cd api && ./build.sh
-    startCommand: cd api && php artisan serve --host=0.0.0.0 --port=$PORT
+    dockerfilePath: ./api/Dockerfile
     envVars:
       - key: APP_KEY
         generateValue: true
@@ -27,59 +26,13 @@ services:
         value: database
 
   # React フロントエンド
-  - type: web
+  - type: static
     name: pocket-money-frontend
-    runtime: node
-    plan: free
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     envVars:
       - key: VITE_API_URL
         value: https://pocket-money-api.onrender.com
-
-  # 株価自動更新（1時間ごとに実行）
-  - type: cron
-    name: pocket-money-stock-updater
-    runtime: php
-    plan: free
-    schedule: "0 * * * *"  # 毎時0分に実行（1時間ごと）
-    buildCommand: cd api && composer install --no-dev --optimize-autoloader
-    startCommand: cd api && php artisan stocks:update-prices
-    envVars:
-      - key: APP_KEY
-        sync: false
-      - key: APP_ENV
-        value: production
-      - key: APP_DEBUG
-        value: false
-      - key: DATABASE_URL
-        fromDatabase:
-          name: pocket-money-db
-          property: connectionString
-      - key: DB_CONNECTION
-        value: pgsql
-
-  # 古い株価データの削除（毎日深夜2時に実行）
-  - type: cron
-    name: pocket-money-stock-cleaner
-    runtime: php
-    plan: free
-    schedule: "0 2 * * *"  # 毎日2:00に実行
-    buildCommand: cd api && composer install --no-dev --optimize-autoloader
-    startCommand: cd api && php artisan stocks:clean-old-prices
-    envVars:
-      - key: APP_KEY
-        sync: false
-      - key: APP_ENV
-        value: production
-      - key: APP_DEBUG
-        value: false
-      - key: DATABASE_URL
-        fromDatabase:
-          name: pocket-money-db
-          property: connectionString
-      - key: DB_CONNECTION
-        value: pgsql
 
 databases:
   - name: pocket-money-db
