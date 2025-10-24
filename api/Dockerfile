@@ -16,10 +16,10 @@ RUN apt-get update && apt-get install -y \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # 作業ディレクトリを設定
-WORKDIR /var/www
+WORKDIR /var/www/html
 
-# アプリケーションファイルをコピー
-COPY . .
+# アプリケーションファイルをコピー（apiディレクトリの中身を/var/www/htmlにコピー）
+COPY . /var/www/html
 
 # Composerの依存関係をインストール
 RUN composer install --no-dev --optimize-autoloader
