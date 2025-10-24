@@ -41,8 +41,8 @@ const RegisterForm = ({ onSwitchToLogin, onClose }) => {
   };
 
   return (
-    <div className="max-w-md w-full mx-auto bg-white p-8 rounded-xl shadow-2xl">
-      <h2 className="text-3xl font-bold text-center mb-8 text-blue-600">新規登録</h2>
+    <div className="max-w-md w-full mx-auto bg-white p-8 rounded-2xl shadow-2xl border border-gray-100">
+      <h2 className="text-3xl font-bold text-center mb-8 text-blue-700">新規登録</h2>
 
       {errors.general && (
         <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
