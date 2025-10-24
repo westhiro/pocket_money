@@ -21,10 +21,16 @@ class DatabaseSeeder extends Seeder
             EventSeeder::class,
         ]);
 
-        // テストユーザー作成
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // テストユーザー作成（既存の場合はスキップ）
+        $existingUser = User::where('email', 'test@example.com')->first();
+        if (!$existingUser) {
+            User::factory()->create([
+                'name' => 'Test User',
+                'email' => 'test@example.com',
+            ]);
+            echo "Test user created.\n";
+        } else {
+            echo "Test user 'test@example.com' already exists, skipping...\n";
+        }
     }
 }
