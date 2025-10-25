@@ -158,6 +158,13 @@ class StockController extends Controller
         $latestHistory = $stock->priceHistory()->latest('recorded_at')->first();
         if ($latestHistory) {
             $stock->update(['current_price' => $latestHistory->price]);
+
+            // チャートの最後に現在の株価を追加（前日比が正しく反映されるように）
+            $formattedData->push([
+                'date' => $latestHistory->recorded_at->format('Y-m-d'),
+                'price' => (float) $latestHistory->price,
+                'change' => (float) ($latestHistory->change_percentage ?? 0)
+            ]);
         }
 
         return response()->json([
