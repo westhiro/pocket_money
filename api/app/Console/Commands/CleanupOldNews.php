@@ -12,7 +12,7 @@ class CleanupOldNews extends Command
      *
      * @var string
      */
-    protected $signature = 'news:cleanup-old';
+    protected $signature = 'news:cleanup-old {--force : 確認なしで削除}';
 
     /**
      * The console command description.
@@ -39,8 +39,8 @@ class CleanupOldNews extends Command
 
         $this->warn("削除対象: {$count}件のニュース");
 
-        // 確認
-        if ($this->confirm('これらのニュースを削除しますか？')) {
+        // --forceオプションがある場合は確認せずに削除
+        if ($this->option('force') || $this->confirm('これらのニュースを削除しますか？')) {
             News::whereNull('event_id')->delete();
             $this->info("✅ {$count}件の古いニュースを削除しました。");
         } else {
