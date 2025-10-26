@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { formatCurrency, formatNumber, popularStocks } from '../data/mockData'
+import { formatCurrency } from '../data/mockData'
 import { stocksAPI } from '../services/api'
 import StockChart from '../components/StockChart'
 import TradingModal from '../components/TradingModal'
@@ -34,8 +34,6 @@ const Investment = () => {
           price: parseFloat(stock.current_price),
           change: stock.price_change || 0,
           changePercent: stock.price_change_percent || 0,
-          volume: Math.floor(Math.random() * 10000000) + 100000, // 仮の出来高
-          marketCap: `${Math.round(Math.random() * 50 + 5)}兆円`, // 仮の時価総額
           chartData: (stock.price_history || []).map(item => parseFloat(item.price))
         }))
         
@@ -107,9 +105,6 @@ const Investment = () => {
   if (loading) {
     return (
       <div className="investment-page">
-        <div className="investment-header">
-          <h1>📊 投資・銘柄検索</h1>
-        </div>
         <div className="loading" style={{ textAlign: 'center', padding: '50px' }}>
           データを読み込み中...
         </div>
@@ -121,9 +116,6 @@ const Investment = () => {
   if (error) {
     return (
       <div className="investment-page">
-        <div className="investment-header">
-          <h1>📊 投資・銘柄検索</h1>
-        </div>
         <div className="error" style={{ textAlign: 'center', padding: '50px', color: 'red' }}>
           {error}
         </div>
@@ -133,34 +125,10 @@ const Investment = () => {
 
   return (
     <div className="investment-page">
-      <div className="investment-header">
-        <h1>📊 投資・銘柄検索</h1>
-        <div className="market-summary">
-          <div className="market-item">
-            <span className="market-label">日経平均</span>
-            <span className="market-value">32,850円</span>
-            <span className="market-change positive">+150 (+0.46%)</span>
-          </div>
-          <div className="market-item">
-            <span className="market-label">TOPIX</span>
-            <span className="market-value">2,385</span>
-            <span className="market-change negative">-8 (-0.33%)</span>
-          </div>
-        </div>
-      </div>
-
       <div className="investment-content">
         <div className="stocks-section">
           <div className="section-header">
             <h2>銘柄一覧</h2>
-            <div className="popular-stocks">
-              <span className="popular-label">人気:</span>
-              {popularStocks.map((stock, index) => (
-                <span key={index} className={`popular-stock ${stock.trend}`}>
-                  {stock.code}
-                </span>
-              ))}
-            </div>
           </div>
 
           <div className="stocks-table-container">
@@ -177,10 +145,6 @@ const Investment = () => {
                   <th onClick={() => handleSort('changePercent')} className="sortable">
                     前日比 {sortBy === 'changePercent' && (sortOrder === 'asc' ? '↑' : '↓')}
                   </th>
-                  <th onClick={() => handleSort('volume')} className="sortable">
-                    出来高 {sortBy === 'volume' && (sortOrder === 'asc' ? '↑' : '↓')}
-                  </th>
-                  <th>時価総額</th>
                   <th>チャート</th>
                   <th>売買</th>
                 </tr>
@@ -201,10 +165,8 @@ const Investment = () => {
                       <br />
                       ({stock.changePercent >= 0 ? '+' : ''}{stock.changePercent}%)
                     </td>
-                    <td className="volume">{formatNumber(stock.volume)}</td>
-                    <td className="market-cap">{stock.marketCap}</td>
                     <td>
-                      <button 
+                      <button
                         className="chart-button"
                         onClick={() => setSelectedStock(stock)}
                       >
