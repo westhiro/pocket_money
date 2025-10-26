@@ -132,28 +132,22 @@ class EventSeeder extends Seeder
 
         // イベント挿入
         foreach ($events as $index => $event) {
-            // 既存のイベントがあればスキップ
-            $existingEvent = \DB::table('events')
-                ->where('title', $event['title'])
-                ->first();
-
-            if ($existingEvent) {
-                echo "Event '{$event['title']}' already exists, skipping...\n";
-                continue;
-            }
-
-            \DB::table('events')->insert([
-                'id' => $index + 1,
-                'title' => $event['title'],
-                'description' => $event['description'],
-                'event_type' => $event['event_type'],
-                'impact_type' => $event['impact_type'],
-                'probability_weight' => $event['probability_weight'],
-                'impact_percentage' => 0.00, // デフォルト値（実際の影響はevent_impactsテーブルで管理）
-                'is_active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            // 既存のイベントがあれば更新、なければ挿入
+            \DB::table('events')->updateOrInsert(
+                ['id' => $index + 1],
+                [
+                    'title' => $event['title'],
+                    'description' => $event['description'],
+                    'event_type' => $event['event_type'],
+                    'genre' => $event['genre'],
+                    'impact_type' => $event['impact_type'],
+                    'probability_weight' => $event['probability_weight'],
+                    'impact_percentage' => 0.00,
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
         }
 
         // イベント影響挿入

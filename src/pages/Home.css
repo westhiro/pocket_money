@@ -10,10 +10,6 @@
   margin: 0 auto;
 }
 
-.news-section-wrapper {
-  width: 100%;
-}
-
 .learning-section-wrapper {
   width: 100%;
 }
@@ -30,13 +26,8 @@
   .home-grid {
     grid-template-columns: 2fr 1fr;
     grid-template-areas:
-      "news news"
       "learning learning"
       "assets stocks";
-  }
-
-  .news-section-wrapper {
-    grid-area: news;
   }
 
   .learning-section-wrapper {
@@ -55,7 +46,6 @@
 @media (min-width: 1024px) {
   .home-grid {
     grid-template-areas:
-      "news news"
       "learning assets"
       "stocks stocks";
   }

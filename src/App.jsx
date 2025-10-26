@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Header from './components/Header'
+import NewsSection from './components/NewsSection'
 import Home from './pages/Home'
 import Investment from './pages/Investment'
 import Learning from './pages/Learning'
@@ -36,6 +37,7 @@ function AppContent() {
   return (
     <div className="App">
       <Header />
+      <NewsSection />
       <main className="main-content">
         <Routes>
           <Route path="/" element={<Home />} />

@@ -83,23 +83,45 @@ class NewsController extends Controller
     // 最新の重要ニュース取得（ホームページ用）
     public function latest()
     {
-        $news = News::with(['event.industry'])
+        $news = News::with(['event'])
             ->where('is_published', true)
             ->latest('published_at')
-            ->limit(5)
+            ->limit(10)
             ->get();
-        
+
         return response()->json([
             'success' => true,
             'data' => $news->map(function ($item) {
+                $affectedIndustries = [];
+
+                if ($item->event) {
+                    // event_impactsから影響を受ける業界を取得
+                    $impacts = \DB::table('event_impacts')
+                        ->where('event_id', $item->event->id)
+                        ->where('target_type', 'industry')
+                        ->get();
+
+                    foreach ($impacts as $impact) {
+                        $industry = \DB::table('industries')->find($impact->target_id);
+                        if ($industry) {
+                            $affectedIndustries[] = [
+                                'name' => $industry->name,
+                                'impact_percentage' => $impact->impact_percentage,
+                                'direction' => $impact->impact_percentage > 0 ? 'up' : 'down'
+                            ];
+                        }
+                    }
+                }
+
                 return [
                     'id' => $item->id,
                     'title' => $item->title,
-                    'content' => mb_substr(strip_tags($item->content), 0, 100) . '...',
+                    'content' => $item->content,
+                    'description' => mb_substr(strip_tags($item->content), 0, 100) . '...',
                     'news_type' => $item->news_type,
+                    'genre' => $item->event ? $item->event->genre : null,
                     'published_at' => $item->published_at->format('Y-m-d H:i'),
-                    'event_impact' => $item->event ? $item->event->impact_percentage : null,
-                    'industry_affected' => $item->event && $item->event->industry ? $item->event->industry->name : null,
+                    'affected_industries' => $affectedIndustries,
                 ];
             })
         ]);

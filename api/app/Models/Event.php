@@ -10,6 +10,7 @@ class Event extends Model
         'title',
         'description',
         'event_type',
+        'genre',
         'industry_id',
         'impact_percentage',
         'is_active',

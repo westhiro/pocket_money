@@ -1,5 +1,4 @@
 import React from 'react'
-import NewsSection from '../components/NewsSection'
 import LearningProgress from '../components/LearningProgress'
 import AssetsOverview from '../components/AssetsOverview'
 import StockList from '../components/StockList'
@@ -9,9 +8,6 @@ const Home = () => {
   return (
     <div className="home">
       <div className="home-grid">
-        <div className="news-section-wrapper">
-          <NewsSection />
-        </div>
         <div className="learning-section-wrapper">
           <LearningProgress />
         </div>

@@ -33,35 +33,31 @@ class TriggerMarketEvents extends Command
     {
         $probability = $this->option('probability');
         $this->info("市場イベントチェック開始... (発生確率: {$probability}%)");
-        
+
         // 確率でイベント発生判定
         $randomNumber = mt_rand(1, 100);
         if ($randomNumber > $probability) {
             $this->info('今回はイベントが発生しませんでした。');
             return 0;
         }
-        
+
         $this->info('🎰 イベントが発生しました！');
-        
-        // ランダムな業界を選択
-        $industry = Industry::inRandomOrder()->first();
-        if (!$industry) {
-            $this->error('業界データが見つかりません。');
+
+        // 既存のイベントテンプレートからランダムに選択
+        $event = Event::where('is_active', true)->inRandomOrder()->first();
+        if (!$event) {
+            $this->error('イベントデータが見つかりません。');
             return 1;
         }
-        
-        // イベント生成
-        $event = $this->generateRandomEvent($industry);
-        
+
         // ニュース生成
         $news = $this->generateNews($event);
-        
+
         // 株価への影響適用
         $this->applyStockImpact($event);
-        
+
         $this->info("✅ イベント完了: {$event->title}");
-        $this->info("📈 {$industry->name}業界の株価に{$event->impact_percentage}%の影響");
-        
+
         return 0;
     }
     
@@ -140,36 +136,42 @@ class TriggerMarketEvents extends Command
     
     private function applyStockImpact($event)
     {
-        // 該当業界の株式を取得
-        $stocks = Stock::where('industry_id', $event->industry_id)->get();
-        
-        foreach ($stocks as $stock) {
-            $currentPrice = $stock->current_price;
-            $impactFactor = 1 + ($event->impact_percentage / 100);
-            $newPrice = $currentPrice * $impactFactor;
-            
-            // 最小値・最大値の範囲内に調整
-            $newPrice = max($stock->min_price, min($stock->max_price, $newPrice));
-            $newPrice = round($newPrice, 2);
-            
-            // 変動率計算
-            $changePercentage = (($newPrice - $currentPrice) / $currentPrice) * 100;
-            
-            // 株価履歴に記録
-            StockPriceHistory::create([
-                'stock_id' => $stock->id,
-                'price' => $newPrice,
-                'change_percentage' => round($changePercentage, 2),
-                'recorded_at' => now()
-            ]);
-            
-            // 株価更新
-            $stock->update([
-                'current_price' => $newPrice,
-                'last_updated_at' => now()
-            ]);
-            
-            $this->line("  - {$stock->company_name}: {$currentPrice}円 → {$newPrice}円 (" . sprintf('%+.2f', $changePercentage) . "%)");
+        // event_impactsテーブルから影響を受ける業界を取得
+        $impacts = \DB::table('event_impacts')
+            ->where('event_id', $event->id)
+            ->where('target_type', 'industry')
+            ->get();
+
+        foreach ($impacts as $impact) {
+            // 該当業界の株式を取得
+            $stocks = Stock::where('industry_id', $impact->target_id)->get();
+
+            foreach ($stocks as $stock) {
+                $currentPrice = $stock->current_price;
+                $impactFactor = 1 + ($impact->impact_percentage / 100);
+                $newPrice = $currentPrice * $impactFactor;
+                $newPrice = round($newPrice, 2);
+
+                // 変動率計算
+                $changePercentage = (($newPrice - $currentPrice) / $currentPrice) * 100;
+
+                // 株価履歴に記録
+                StockPriceHistory::create([
+                    'stock_id' => $stock->id,
+                    'price' => $newPrice,
+                    'change_percentage' => round($changePercentage, 2),
+                    'recorded_at' => now()
+                ]);
+
+                // 株価更新
+                $stock->update([
+                    'current_price' => $newPrice,
+                    'last_updated_at' => now()
+                ]);
+
+                $industry = Industry::find($impact->target_id);
+                $this->line("  - {$stock->company_name} ({$industry->name}): {$currentPrice}円 → {$newPrice}円 (" . sprintf('%+.2f', $changePercentage) . "%)");
+            }
         }
     }
 }

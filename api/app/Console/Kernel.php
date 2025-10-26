@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
         Commands\UpdateStockPrices::class,
         Commands\GenerateStockHistory::class,
         Commands\CleanOldNews::class,
+        Commands\TriggerMarketEvents::class,
     ];
 
     /**
@@ -26,6 +27,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        // 1時間ごとに20%の確率でマーケットイベントを発生
+        $schedule->command('events:trigger', ['--probability' => 20])
+                ->hourly()
+                ->timezone('Asia/Tokyo')
+                ->withoutOverlapping()
+                ->runInBackground()
+                ->appendOutputTo(storage_path('logs/market-events.log'));
+
         // 1時間ごとに株価を更新
         $schedule->command('stocks:update-prices')
                 ->hourly()
