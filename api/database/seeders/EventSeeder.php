@@ -161,5 +161,23 @@ class EventSeeder extends Seeder
                 'updated_at' => now(),
             ]);
         }
+
+        // 初期ニュースを作成（ランダムに3件のイベント）
+        $randomEventIds = array_rand(range(1, count($events)), 3);
+        foreach ($randomEventIds as $eventId) {
+            $actualEventId = $eventId + 1; // array_randは0ベース、event_idは1ベース
+            $event = $events[$eventId];
+
+            \DB::table('news')->insert([
+                'title' => $event['title'],
+                'content' => $event['description'],
+                'news_type' => 'event',
+                'event_id' => $actualEventId,
+                'is_published' => true,
+                'published_at' => now()->subHours(rand(1, 24)), // 過去1-24時間前に発生したことにする
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
     }
 }

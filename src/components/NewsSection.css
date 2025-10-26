@@ -1,17 +1,17 @@
 /* ニュースティッカー - ヘッダーの下に配置される横長のニュース表示 */
 .news-ticker {
-  background: #424242;
+  background: #757575;
   padding: 0.75rem 1.5rem;
   width: 100%;
   box-sizing: border-box;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #555;
   overflow: hidden;
   cursor: pointer;
   transition: background 0.2s ease;
 }
 
 .news-ticker:hover {
-  background: #505050;
+  background: #808080;
 }
 
 .news-ticker-content {
