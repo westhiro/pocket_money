@@ -42,6 +42,8 @@ echo "Waiting for database..."\n\
 sleep 5\n\
 echo "Running migrations..."\n\
 php artisan migrate --force || true\n\
+echo "Cleaning up old news..."\n\
+php artisan news:cleanup-old --no-interaction || true\n\
 echo "Running seeders..."\n\
 php artisan db:seed --force || true\n\
 echo "Starting server..."\n\
