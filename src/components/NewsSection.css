@@ -1,17 +1,17 @@
 /* ニュースティッカー - ヘッダーの下に配置される横長のニュース表示 */
 .news-ticker {
-  background: #e0e0e0;
+  background: #424242;
   padding: 0.75rem 1.5rem;
   width: 100%;
   box-sizing: border-box;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #333;
   overflow: hidden;
   cursor: pointer;
   transition: background 0.2s ease;
 }
 
 .news-ticker:hover {
-  background: #d0d0d0;
+  background: #505050;
 }
 
 .news-ticker-content {
@@ -22,22 +22,22 @@
   transition: opacity 0.3s ease;
 }
 
-/* 左回転アニメーション */
+/* 左スライドアニメーション */
 .news-ticker-content.rotating {
-  animation: rotateLeft 0.5s ease-in-out;
+  animation: slideLeft 0.5s ease-in-out;
 }
 
-@keyframes rotateLeft {
+@keyframes slideLeft {
   0% {
-    transform: rotateY(0deg);
+    transform: translateX(0);
     opacity: 1;
   }
   50% {
-    transform: rotateY(-90deg);
+    transform: translateX(-30px);
     opacity: 0;
   }
   100% {
-    transform: rotateY(0deg);
+    transform: translateX(0);
     opacity: 1;
   }
 }
@@ -58,7 +58,7 @@
 }
 
 .news-title {
-  color: #333;
+  color: white;
   font-size: 0.9rem;
   font-weight: 500;
   flex: 1;
@@ -77,7 +77,7 @@
 }
 
 .news-time {
-  color: #666;
+  color: #e0e0e0;
   font-size: 0.75rem;
   flex-shrink: 0;
 }
@@ -85,12 +85,12 @@
 .loading, .error, .no-news {
   text-align: center;
   padding: 0.75rem;
-  color: #666;
+  color: white;
   font-size: 0.9rem;
 }
 
 .error {
-  color: #f44336;
+  color: #ff6b6b;
 }
 
 @media (max-width: 768px) {

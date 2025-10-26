@@ -4,6 +4,10 @@ import './NewsDetailModal.css'
 const NewsDetailModal = ({ isOpen, onClose, news }) => {
   if (!isOpen || !news) return null
 
+  // デバッグ用
+  console.log('NewsDetailModal - news:', news)
+  console.log('NewsDetailModal - affected_industries:', news.affected_industries)
+
   return (
     <div className="news-modal-overlay" onClick={onClose}>
       <div className="news-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -16,7 +20,6 @@ const NewsDetailModal = ({ isOpen, onClose, news }) => {
 
         <div className="news-modal-body">
           <div className="news-detail-section">
-            <h3>詳細</h3>
             <p className="news-description">{news.content}</p>
           </div>
 

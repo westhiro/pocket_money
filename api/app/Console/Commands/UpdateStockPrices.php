@@ -70,9 +70,10 @@ class UpdateStockPrices extends Command
             if ($event) {
                 // ニュースとして記録
                 \DB::table('news')->insert([
-                    'title' => '🚨 緊急速報: ' . $event->title,
+                    'title' => $event->title,
                     'content' => $event->description,
-                    'news_type' => $event->impact_type === 'positive' ? 'good' : 'bad',
+                    'news_type' => 'event',
+                    'event_id' => $event->id,
                     'is_published' => true,
                     'published_at' => now(),
                     'created_at' => now(),
@@ -251,8 +252,8 @@ class UpdateStockPrices extends Command
                 'trend_updated_at' => now()
             ]);
 
-            // トレンド変更のニュースを作成
-            $this->createTrendNews($stock, $newTrend);
+            // トレンド変更のニュースは作成しない（イベントベースのニュースのみ表示）
+            // $this->createTrendNews($stock, $newTrend);
         }
 
         // トレンドに基づいた変動

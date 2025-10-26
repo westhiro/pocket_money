@@ -116,7 +116,7 @@ class NewsController extends Controller
                 return [
                     'id' => $item->id,
                     'title' => $item->title,
-                    'content' => $item->content,
+                    'content' => $item->event ? $item->event->description : $item->content,
                     'description' => mb_substr(strip_tags($item->content), 0, 100) . '...',
                     'news_type' => $item->news_type,
                     'genre' => $item->event ? $item->event->genre : null,
