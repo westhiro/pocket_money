@@ -126,6 +126,16 @@ const Investment = () => {
   return (
     <div className="investment-page">
       <div className="investment-content">
+        <div className="chart-section">
+          {selectedStock && (
+            <StockChart
+              stock={selectedStock}
+              onBuy={() => handleBuy(selectedStock)}
+              onSell={() => handleSell(selectedStock)}
+            />
+          )}
+        </div>
+
         <div className="stocks-section">
           <div className="section-header">
             <h2>銘柄一覧</h2>
@@ -175,13 +185,13 @@ const Investment = () => {
                     </td>
                     <td>
                       <div className="trade-buttons">
-                        <button 
+                        <button
                           className="buy-btn"
                           onClick={() => handleBuy(stock)}
                         >
                           買
                         </button>
-                        <button 
+                        <button
                           className="sell-btn"
                           onClick={() => handleSell(stock)}
                         >
@@ -194,16 +204,6 @@ const Investment = () => {
               </tbody>
             </table>
           </div>
-        </div>
-
-        <div className="chart-section">
-          {selectedStock && (
-            <StockChart 
-              stock={selectedStock}
-              onBuy={() => handleBuy(selectedStock)}
-              onSell={() => handleSell(selectedStock)}
-            />
-          )}
         </div>
       </div>
 

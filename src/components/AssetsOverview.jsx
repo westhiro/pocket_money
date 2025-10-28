@@ -29,12 +29,17 @@ const AssetsOverview = () => {
           userAPI.getAssetHistory(30)
         ])
 
+        console.log('Assets response:', assetsResponse.data)
+        console.log('Portfolio response:', portfolioResponse.data)
+        console.log('History response:', historyResponse.data)
+
         setAssetData(assetsResponse.data.data)
         setPortfolioData(portfolioResponse.data.data)
-        setAssetHistory(historyResponse.data.data)
+        setAssetHistory(historyResponse.data.data || [])
       } catch (err) {
         console.error('Asset data fetch error:', err)
-        setError('資産データの取得に失敗しました')
+        console.error('Error details:', err.response?.data)
+        setError('資産データの取得に失敗しました: ' + (err.response?.data?.message || err.message))
       } finally {
         setLoading(false)
       }

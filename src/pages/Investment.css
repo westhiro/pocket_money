@@ -55,8 +55,8 @@
 }
 
 .investment-content {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 2rem;
 }
 
@@ -278,12 +278,7 @@
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   border: 1px solid #e0e0e0;
-}
-
-@media (min-width: 1024px) {
-  .investment-content {
-    grid-template-columns: 2fr 1fr;
-  }
+  width: 100%;
 }
 
 @media (max-width: 768px) {

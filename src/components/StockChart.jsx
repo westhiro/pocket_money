@@ -107,10 +107,9 @@ const StockChart = ({ stock, onBuy, onSell }) => {
             </button>
           ))}
         </div>
-        <svg 
-          width={chartWidth} 
-          height={chartHeight} 
+        <svg
           viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+          preserveAspectRatio="xMidYMid meet"
           className="price-chart"
         >
           <defs>
