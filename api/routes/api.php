@@ -72,8 +72,7 @@ Route::get('/trigger-update', function () {
         return response()->json([
             'success' => true,
             'message' => '株価更新が完了しました',
-            'timestamp' => now()->toDateTimeString(),
-            'output' => $output
+            'timestamp' => now()->toDateTimeString()
         ]);
     } catch (\Exception $e) {
         \Log::error('株価更新エラー: ' . $e->getMessage());
