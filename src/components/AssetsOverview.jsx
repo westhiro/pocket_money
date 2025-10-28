@@ -7,6 +7,7 @@ const AssetsOverview = () => {
   const { isAuthenticated } = useAuth()
   const [assetData, setAssetData] = useState(null)
   const [portfolioData, setPortfolioData] = useState(null)
+  const [assetHistory, setAssetHistory] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -15,19 +16,22 @@ const AssetsOverview = () => {
       if (!isAuthenticated) {
         setAssetData(null)
         setPortfolioData(null)
+        setAssetHistory([])
         setLoading(false)
         return
       }
 
       try {
         setLoading(true)
-        const [assetsResponse, portfolioResponse] = await Promise.all([
+        const [assetsResponse, portfolioResponse, historyResponse] = await Promise.all([
           userAPI.getAssets(),
-          tradingAPI.getPortfolio()
+          tradingAPI.getPortfolio(),
+          userAPI.getAssetHistory(30)
         ])
-        
+
         setAssetData(assetsResponse.data.data)
         setPortfolioData(portfolioResponse.data.data)
+        setAssetHistory(historyResponse.data.data)
       } catch (err) {
         console.error('Asset data fetch error:', err)
         setError('資産データの取得に失敗しました')
@@ -95,10 +99,7 @@ const AssetsOverview = () => {
     })
   }
 
-  // パフォーマンスデータ（今回は現在のデータのみ表示）
-  const performanceData = [
-    { month: '現在', value: totalAssets }
-  ]
+  // 資産履歴データは既にstateで管理されています
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('ja-JP').format(Math.round(amount || 0))
@@ -195,6 +196,65 @@ const AssetsOverview = () => {
             </div>
           ) : (
             <div className="no-stocks">まだ株式を保有していません</div>
+          )}
+        </div>
+
+        <div className="asset-history">
+          <h3>資産推移（1ヶ月）</h3>
+          {assetHistory.length > 0 ? (
+            <>
+              <div className="line-chart">
+                <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="none">
+                  {/* グリッドライン */}
+                  <line x1="0" y1="25" x2="300" y2="25" stroke="#e0e0e0" strokeWidth="0.5" />
+                  <line x1="0" y1="50" x2="300" y2="50" stroke="#e0e0e0" strokeWidth="0.5" />
+                  <line x1="0" y1="75" x2="300" y2="75" stroke="#e0e0e0" strokeWidth="0.5" />
+
+                  {/* 折れ線グラフ */}
+                  {assetHistory.length > 1 && (() => {
+                    const maxValue = Math.max(...assetHistory.map(d => d.total_assets))
+                    const minValue = Math.min(...assetHistory.map(d => d.total_assets))
+                    const range = maxValue - minValue || 1
+
+                    const points = assetHistory.map((point, index) => {
+                      const x = (index / (assetHistory.length - 1)) * 300
+                      const y = 90 - ((point.total_assets - minValue) / range) * 80
+                      return `${x},${y}`
+                    }).join(' ')
+
+                    return (
+                      <>
+                        <polyline
+                          points={points}
+                          fill="none"
+                          stroke="#2196F3"
+                          strokeWidth="2"
+                        />
+                        {/* 面積の塗りつぶし */}
+                        <polygon
+                          points={`0,90 ${points} 300,90`}
+                          fill="url(#gradient)"
+                          opacity="0.2"
+                        />
+                        <defs>
+                          <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#2196F3" stopOpacity="0.6" />
+                            <stop offset="100%" stopColor="#2196F3" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                      </>
+                    )
+                  })()}
+                </svg>
+              </div>
+              <div className="chart-labels">
+                <span className="chart-label">{assetHistory[0]?.date}</span>
+                <span className="chart-label">{assetHistory[Math.floor(assetHistory.length / 2)]?.date}</span>
+                <span className="chart-label">{assetHistory[assetHistory.length - 1]?.date}</span>
+              </div>
+            </>
+          ) : (
+            <div className="no-assets">資産履歴データがありません</div>
           )}
         </div>
       </div>

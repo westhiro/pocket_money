@@ -150,7 +150,9 @@ class EventSeeder extends Seeder
             );
         }
 
-        // イベント影響挿入
+        // イベント影響挿入（重複を防ぐため既存データを削除してから挿入）
+        \DB::table('event_impacts')->delete();
+
         foreach ($eventImpacts as $impact) {
             \DB::table('event_impacts')->insert([
                 'event_id' => $impact['event_id'],

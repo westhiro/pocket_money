@@ -78,16 +78,19 @@ export const getCSRFToken = async () => {
 export const userAPI = {
   // ユーザー資産取得
   getAssets: () => api.get('/user/assets'),
-  
-  // ユーザー保有株取得  
+
+  // ユーザー資産履歴取得
+  getAssetHistory: (days = 30) => api.get(`/user/assets/history?days=${days}`),
+
+  // ユーザー保有株取得
   getStocks: () => api.get('/user/stocks'),
-  
+
   // 株式購入
-  buyStock: (stockId, quantity) => 
+  buyStock: (stockId, quantity) =>
     api.post('/user/stocks/buy', { stock_id: stockId, quantity }),
-  
+
   // 株式売却
-  sellStock: (stockId, quantity) => 
+  sellStock: (stockId, quantity) =>
     api.post('/user/stocks/sell', { stock_id: stockId, quantity }),
 };
 

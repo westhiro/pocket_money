@@ -22,31 +22,4 @@
   width: 100%;
 }
 
-@media (min-width: 768px) {
-  .home-grid {
-    grid-template-columns: 2fr 1fr;
-    grid-template-areas:
-      "learning learning"
-      "assets stocks";
-  }
-
-  .learning-section-wrapper {
-    grid-area: learning;
-  }
-
-  .assets-section-wrapper {
-    grid-area: assets;
-  }
-
-  .stocks-section-wrapper {
-    grid-area: stocks;
-  }
-}
-
-@media (min-width: 1024px) {
-  .home-grid {
-    grid-template-areas:
-      "learning assets"
-      "stocks stocks";
-  }
-}
+/* すべてのセクションを同じ横幅で縦に並べる */

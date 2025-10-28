@@ -17,6 +17,7 @@ Route::prefix('auth')->group(function () {
 // ユーザー関連API（認証不要 - user_idベース）
 Route::prefix('user')->group(function () {
     Route::get('/assets', [UserController::class, 'getAssets']);
+    Route::get('/assets/history', [UserController::class, 'getAssetHistory']);
     Route::get('/stocks', [UserController::class, 'getStocks']);
     Route::post('/stocks/buy', [UserController::class, 'buyStock']);
     Route::post('/stocks/sell', [UserController::class, 'sellStock']);

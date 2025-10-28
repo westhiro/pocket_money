@@ -120,4 +120,56 @@ class UserController extends Controller
             ]
         ]);
     }
+
+    // ユーザーの資産履歴を取得
+    public function getAssetHistory(Request $request)
+    {
+        // リクエストからuser_idを取得（なければ認証ユーザー）
+        $userId = $request->input('user_id') ?? $request->header('X-User-Id');
+
+        if (!$userId && Auth::check()) {
+            $userId = Auth::id();
+        }
+
+        if (!$userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User ID is required'
+            ], 400);
+        }
+
+        $user = \App\Models\User::find($userId);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        // 期間を取得（デフォルトは1ヶ月）
+        $days = $request->input('days', 30);
+
+        // 資産履歴を取得
+        $histories = \DB::table('asset_histories')
+            ->where('user_id', $user->id)
+            ->where('recorded_at', '>=', now()->subDays($days))
+            ->orderBy('recorded_at', 'asc')
+            ->get();
+
+        $data = $histories->map(function($history) {
+            return [
+                'date' => date('m/d', strtotime($history->recorded_at)),
+                'total_assets' => (float) $history->total_assets,
+                'stock_value' => (float) $history->stock_value,
+                'coin_balance' => (float) $history->coin_balance,
+                'recorded_at' => $history->recorded_at,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
+    }
 }
