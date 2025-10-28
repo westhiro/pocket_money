@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { formatCurrency, formatNumber } from '../data/mockData'
+import { useState, useEffect } from 'react'
+import { formatCurrency } from '../utils/format'
 import { stocksAPI } from '../services/api'
 import './StockChart.css'
 
@@ -8,6 +8,7 @@ const StockChart = ({ stock, onBuy, onSell }) => {
   const [selectedPeriod, setSelectedPeriod] = useState('1w')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [hoveredPoint, setHoveredPoint] = useState(null)
 
   // チャートデータを取得
   useEffect(() => {
@@ -94,10 +95,10 @@ const StockChart = ({ stock, onBuy, onSell }) => {
           {loading && <span className="loading-text"> (読み込み中...)</span>}
           {error && <span className="error-text"> (エラー: {error})</span>}
         </div>
-        
+
         <div className="period-buttons">
           {Object.entries(periodNames).map(([period, name]) => (
-            <button 
+            <button
               key={period}
               className={`period-btn ${selectedPeriod === period ? 'active' : ''}`}
               onClick={() => handlePeriodChange(period)}
@@ -107,11 +108,12 @@ const StockChart = ({ stock, onBuy, onSell }) => {
             </button>
           ))}
         </div>
-        <svg
-          viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-          preserveAspectRatio="xMidYMid meet"
-          className="price-chart"
-        >
+        <div className="chart-wrapper">
+          <svg
+            viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+            preserveAspectRatio="xMidYMid meet"
+            className="price-chart"
+          >
           <defs>
             <linearGradient id="stockGradient" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor={isPositive ? "#4CAF50" : "#f44336"} stopOpacity="0.3"/>
@@ -153,30 +155,38 @@ const StockChart = ({ stock, onBuy, onSell }) => {
                 key={index}
                 cx={x}
                 cy={y}
-                r="3"
+                r="4"
                 fill="#2196F3"
                 stroke="white"
                 strokeWidth="2"
+                style={{ cursor: 'pointer' }}
+                onMouseEnter={() => setHoveredPoint({ price, x, y, index })}
+                onMouseLeave={() => setHoveredPoint(null)}
               />
             )
           })}
         </svg>
-        
+
+        {hoveredPoint && (
+          <div
+            className="chart-tooltip"
+            style={{
+              left: `${(hoveredPoint.x / chartWidth) * 100}%`,
+              top: `${(hoveredPoint.y / chartHeight) * 100}%`
+            }}
+          >
+            {formatCurrency(hoveredPoint.price)}
+          </div>
+        )}
+
         <div className="chart-labels">
           <span>{periodNames[selectedPeriod]}前</span>
           <span>現在</span>
         </div>
       </div>
+      </div>
 
       <div className="stock-details">
-        <div className="detail-row">
-          <span className="detail-label">出来高:</span>
-          <span className="detail-value">{formatNumber(stock.volume)}</span>
-        </div>
-        <div className="detail-row">
-          <span className="detail-label">時価総額:</span>
-          <span className="detail-value">{stock.marketCap}</span>
-        </div>
         <div className="detail-row">
           <span className="detail-label">高値:</span>
           <span className="detail-value">{formatCurrency(maxPrice)}</span>

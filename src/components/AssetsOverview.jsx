@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { userAPI, tradingAPI } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
+import { formatCurrency } from '../utils/format'
 import './AssetsOverview.css'
 
 const AssetsOverview = () => {
@@ -105,10 +106,6 @@ const AssetsOverview = () => {
   }
 
   // 資産履歴データは既にstateで管理されています
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('ja-JP').format(Math.round(amount || 0))
-  }
 
   return (
     <div className="assets-overview">

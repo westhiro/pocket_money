@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import TradingModal from './TradingModal'
 import { userAPI, tradingAPI } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
+import { formatCurrency } from '../utils/format'
 import './StockList.css'
 
 const StockList = () => {
@@ -62,10 +63,6 @@ const StockList = () => {
 
     fetchUserStocks()
   }, [isAuthenticated])
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('ja-JP').format(Math.round(amount || 0))
-  }
 
   const handleBuy = (stock) => {
     setModalState({
@@ -166,12 +163,12 @@ const StockList = () => {
                     <div className="company-code">{stock.code}</div>
                   </div>
                 </td>
-                <td className="shares">{formatCurrency(stock.shares)}株</td>
-                <td className="price">¥{formatCurrency(stock.price)}</td>
-                <td className="total-value">¥{formatCurrency(stock.totalValue)}</td>
+                <td className="shares">{stock.shares}株</td>
+                <td className="price">{formatCurrency(stock.price)}</td>
+                <td className="total-value">{formatCurrency(stock.totalValue)}</td>
                 <td className={`profit-loss ${stock.profitLoss >= 0 ? 'positive' : 'negative'}`}>
                   <div className="profit-amount">
-                    {stock.profitLoss >= 0 ? '+' : ''}¥{formatCurrency(Math.abs(stock.profitLoss))}
+                    {stock.profitLoss >= 0 ? '+' : ''}{formatCurrency(Math.abs(stock.profitLoss))}
                   </div>
                   <div className="profit-percent">
                     ({stock.profitLossPercent >= 0 ? '+' : ''}{Math.round(stock.profitLossPercent)}%)

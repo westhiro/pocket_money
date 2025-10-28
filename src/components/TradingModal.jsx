@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { formatCurrency, formatNumber } from '../data/mockData'
+import { formatCurrency, formatNumber } from '../utils/format'
 import { tradingAPI } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
 import './TradingModal.css'

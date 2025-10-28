@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { formatCurrency } from '../data/mockData'
+import { formatCurrency } from '../utils/format'
 import { stocksAPI } from '../services/api'
 import StockChart from '../components/StockChart'
 import TradingModal from '../components/TradingModal'
@@ -24,7 +24,7 @@ const Investment = () => {
       try {
         setLoading(true)
         const response = await stocksAPI.getAll()
-        
+
         // APIデータを投資ページ用フォーマットに変換
         const formattedStocks = response.data.data.map(stock => ({
           id: stock.id,
@@ -36,10 +36,18 @@ const Investment = () => {
           changePercent: stock.price_change_percent || 0,
           chartData: (stock.price_history || []).map(item => parseFloat(item.price))
         }))
-        
+
         setStocks(formattedStocks)
+
+        // 最後に見ていた株を復元、なければ一番上の株を選択
         if (formattedStocks.length > 0) {
-          setSelectedStock(formattedStocks[0])
+          const lastSelectedStockId = localStorage.getItem('lastSelectedStockId')
+          if (lastSelectedStockId) {
+            const lastStock = formattedStocks.find(s => s.id === parseInt(lastSelectedStockId))
+            setSelectedStock(lastStock || formattedStocks[0])
+          } else {
+            setSelectedStock(formattedStocks[0])
+          }
         }
       } catch (err) {
         setError('株式データの取得に失敗しました: ' + err.message)
@@ -51,6 +59,13 @@ const Investment = () => {
 
     fetchStocks()
   }, [])
+
+  // 選択された株をlocalStorageに保存
+  useEffect(() => {
+    if (selectedStock) {
+      localStorage.setItem('lastSelectedStockId', selectedStock.id.toString())
+    }
+  }, [selectedStock])
 
   const handleSort = (column) => {
     if (sortBy === column) {

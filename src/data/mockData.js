@@ -330,16 +330,3 @@ export const learningStats = {
   currentStreak: 5, // 連続学習日数
   totalPoints: 2400
 }
-
-// ユーティリティ関数
-export const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('ja-JP', {
-    style: 'currency',
-    currency: 'JPY',
-    maximumFractionDigits: 0
-  }).format(amount)
-}
-
-export const formatNumber = (amount) => {
-  return new Intl.NumberFormat('ja-JP').format(amount)
-}
