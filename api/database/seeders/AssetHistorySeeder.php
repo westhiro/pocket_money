@@ -15,7 +15,7 @@ class AssetHistorySeeder extends Seeder
      */
     public function run(): void
     {
-        $this->command->info('過去30日分の資産履歴を生成します...');
+        $this->command->info('過去7日分の資産履歴を生成します（各日の終値のみ）...');
 
         // 既存の資産履歴を削除
         DB::table('asset_histories')->delete();
@@ -35,15 +35,16 @@ class AssetHistorySeeder extends Seeder
 
             $currentTotalAssets = $user->current_coins + $currentStockValue;
 
-            // 30日前の資産は現在の85%とする
+            // 7日前の資産は現在の85%とする
             $startAssets = $currentTotalAssets * 0.85;
 
-            // 過去30日分のデータを生成
-            for ($i = 30; $i >= 0; $i--) {
-                $date = now()->subDays($i);
+            // 過去7日分のデータを生成（各日の終値 = 23:00のデータ）
+            for ($i = 7; $i >= 1; $i--) {
+                // 各日の23:00（終値）に設定
+                $date = now()->subDays($i)->setHour(23)->setMinute(0)->setSecond(0);
 
                 // 進捗率（0から1）
-                $progress = (30 - $i) / 30;
+                $progress = (7 - $i) / 7;
 
                 // 基本的な増加傾向
                 $baseAssets = $startAssets + ($currentTotalAssets - $startAssets) * $progress;
@@ -68,9 +69,9 @@ class AssetHistorySeeder extends Seeder
                 ]);
             }
 
-            $this->command->info("ユーザーID {$user->id} の資産履歴を生成しました");
+            $this->command->info("ユーザーID {$user->id} の資産履歴を生成しました（7日分）");
         }
 
-        $this->command->info('資産履歴の生成が完了しました');
+        $this->command->info('資産履歴の生成が完了しました（各日の終値データ）');
     }
 }

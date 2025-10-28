@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Stock;
 use App\Models\StockPriceHistory;
+use App\Models\User;
+use App\Models\UserStock;
 use Carbon\Carbon;
 
 class UpdateStockPrices extends Command
@@ -53,7 +55,51 @@ class UpdateStockPrices extends Command
         }
 
         $this->info("\n株価更新完了！ {$updatedCount}社の株価を更新しました。");
+
+        // 3. 全ユーザーの資産履歴を記録
+        $this->recordAssetHistory($updateTime);
+
         return 0;
+    }
+
+    /**
+     * 全ユーザーの資産履歴を記録
+     */
+    private function recordAssetHistory($recordedAt)
+    {
+        $this->info("\n資産履歴を記録中...");
+
+        $users = User::all();
+        $recordedCount = 0;
+
+        foreach ($users as $user) {
+            // 保有株式の合計価値を計算
+            $userStocks = UserStock::where('user_id', $user->id)
+                ->where('quantity', '>', 0)
+                ->with('stock')
+                ->get();
+
+            $totalStockValue = $userStocks->sum(function($userStock) {
+                return $userStock->stock->current_price * $userStock->quantity;
+            });
+
+            $totalAssets = $user->current_coins + $totalStockValue;
+
+            // 資産履歴を記録
+            \DB::table('asset_histories')->insert([
+                'user_id' => $user->id,
+                'total_assets' => $totalAssets,
+                'stock_value' => $totalStockValue,
+                'coin_balance' => $user->current_coins,
+                'recorded_at' => $recordedAt,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $recordedCount++;
+        }
+
+        $this->info("資産履歴記録完了！ {$recordedCount}ユーザーの資産を記録しました。");
     }
 
     /**

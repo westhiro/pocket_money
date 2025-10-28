@@ -150,11 +150,24 @@ class UserController extends Controller
         // 期間を取得（デフォルトは1ヶ月）
         $days = $request->input('days', 30);
 
-        // 資産履歴を取得
-        $histories = \DB::table('asset_histories')
+        // 資産履歴を取得（各日の最後のデータのみ、今日のデータは除外）
+        // サブクエリで各日の最後のrecorded_atを取得
+        $latestRecords = \DB::table('asset_histories')
+            ->select(\DB::raw('DATE(recorded_at) as date'), \DB::raw('MAX(recorded_at) as last_recorded_at'))
             ->where('user_id', $user->id)
             ->where('recorded_at', '>=', now()->subDays($days))
-            ->orderBy('recorded_at', 'asc')
+            ->where('recorded_at', '<', now()->startOfDay()) // 今日より前のデータのみ
+            ->groupBy(\DB::raw('DATE(recorded_at)'));
+
+        // 各日の最後のレコードを取得
+        $histories = \DB::table('asset_histories as ah')
+            ->joinSub($latestRecords, 'lr', function($join) {
+                $join->on(\DB::raw('DATE(ah.recorded_at)'), '=', 'lr.date')
+                     ->on('ah.recorded_at', '=', 'lr.last_recorded_at');
+            })
+            ->where('ah.user_id', $user->id)
+            ->select('ah.*')
+            ->orderBy('ah.recorded_at', 'asc')
             ->get();
 
         $data = $histories->map(function($history) {
