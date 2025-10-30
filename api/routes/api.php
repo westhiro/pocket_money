@@ -87,15 +87,15 @@ Route::get('/trigger-update', function () {
     try {
         \Log::info('株価更新トリガーが呼ばれました');
 
-        // 株価更新コマンドを実行
-        \Artisan::call('stocks:update-prices', ['--force' => true]);
+        // 株価更新コマンドを実行（forceなし = 1時間に1回のみ更新）
+        \Artisan::call('stocks:update-prices');
         $output = \Artisan::output();
 
-        \Log::info('株価更新完了: ' . $output);
+        \Log::info('株価更新結果: ' . $output);
 
         return response()->json([
             'success' => true,
-            'message' => '株価更新が完了しました',
+            'message' => $output ?: '株価更新処理を実行しました',
             'timestamp' => now()->toDateTimeString()
         ]);
     } catch (\Exception $e) {
