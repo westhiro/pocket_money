@@ -95,7 +95,25 @@ const Header = () => {
                   </button>
                   {isMenuOpen && (
                     <div className="dropdown-menu">
-                      <button onClick={handleLogout} className="logout-btn">
+                      <Link to="/profile" className="menu-item" onClick={() => setIsMenuOpen(false)}>
+                        <span className="menu-icon">👤</span>
+                        プロフィール
+                      </Link>
+                      <Link to="/notifications" className="menu-item" onClick={() => setIsMenuOpen(false)}>
+                        <span className="menu-icon">🔔</span>
+                        お知らせ
+                      </Link>
+                      <Link to="/inquiry" className="menu-item" onClick={() => setIsMenuOpen(false)}>
+                        <span className="menu-icon">💬</span>
+                        お問い合わせ
+                      </Link>
+                      <Link to="/help" className="menu-item" onClick={() => setIsMenuOpen(false)}>
+                        <span className="menu-icon">❓</span>
+                        ヘルプ
+                      </Link>
+                      <div className="menu-divider"></div>
+                      <button onClick={handleLogout} className="menu-item logout-item">
+                        <span className="menu-icon">🚪</span>
                         ログアウト
                       </button>
                     </div>

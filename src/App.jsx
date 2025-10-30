@@ -6,6 +6,10 @@ import NewsSection from './components/NewsSection'
 import Home from './pages/Home'
 import Investment from './pages/Investment'
 import Learning from './pages/Learning'
+import Notifications from './pages/Notifications'
+import Inquiry from './pages/Inquiry'
+import Profile from './pages/Profile'
+import Help from './pages/Help'
 import AuthModal from './components/Auth/AuthModal'
 import './App.css'
 
@@ -44,6 +48,10 @@ function AppContent() {
           <Route path="/home" element={<Home />} />
           <Route path="/investment" element={<Investment />} />
           <Route path="/learning" element={<Learning />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/inquiry" element={<Inquiry />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/help" element={<Help />} />
         </Routes>
       </main>
     </div>

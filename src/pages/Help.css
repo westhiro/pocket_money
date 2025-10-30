@@ -1,0 +1,46 @@
+.help-page {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  font-size: 24px;
+  color: #333;
+}
+
+.help-content {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 32px;
+}
+
+.help-section h2 {
+  font-size: 20px;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.help-section p {
+  font-size: 15px;
+  color: #666;
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.help-section ul {
+  margin-top: 16px;
+  padding-left: 20px;
+}
+
+.help-section li {
+  font-size: 15px;
+  color: #666;
+  line-height: 1.7;
+  margin-bottom: 8px;
+}

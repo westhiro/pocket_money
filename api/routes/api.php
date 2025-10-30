@@ -6,6 +6,9 @@ use App\Http\Controllers\API\StockController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\TradingController;
 use App\Http\Controllers\API\NewsController;
+use App\Http\Controllers\API\NotificationController;
+use App\Http\Controllers\API\InquiryController;
+use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\Auth\AuthController;
 
 // 認証関連API（認証不要）
@@ -50,6 +53,27 @@ Route::prefix('news')->group(function () {
     Route::get('/latest', [NewsController::class, 'latest']); // 最新ニュース（ホームページ用）
     Route::get('/events', [NewsController::class, 'eventNews']); // イベント関連ニュース
     Route::get('/{id}', [NewsController::class, 'show']); // 個別ニュース詳細
+});
+
+// お知らせ関連API（認証不要 - user_idベース）
+Route::prefix('notifications')->group(function () {
+    Route::get('/', [NotificationController::class, 'index']); // お知らせ一覧
+    Route::get('/unread-count', [NotificationController::class, 'getUnreadCount']); // 未読件数
+    Route::get('/{id}', [NotificationController::class, 'show']); // 個別お知らせ
+    Route::post('/{id}/read', [NotificationController::class, 'markAsRead']); // お知らせを既読にする
+});
+
+// お問い合わせ関連API（認証不要 - user_idベース）
+Route::prefix('inquiries')->group(function () {
+    Route::get('/', [InquiryController::class, 'index']); // お問い合わせ一覧
+    Route::get('/{id}', [InquiryController::class, 'show']); // 個別お問い合わせ
+    Route::post('/', [InquiryController::class, 'store']); // お問い合わせ作成
+});
+
+// プロフィール関連API（認証不要 - user_idベース）
+Route::prefix('profile')->group(function () {
+    Route::get('/', [ProfileController::class, 'show']); // プロフィール取得
+    Route::put('/', [ProfileController::class, 'update']); // プロフィール更新
 });
 
 // テスト用API（認証不要）- 開発期間中のみ

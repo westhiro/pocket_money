@@ -139,15 +139,51 @@ export const newsAPI = {
 export const authAPI = {
   // 新規登録
   register: (userData) => api.post('/auth/register', userData),
-  
+
   // ログイン
   login: (credentials) => api.post('/auth/login', credentials),
-  
+
   // ログアウト
   logout: () => api.post('/auth/logout'),
-  
+
   // ユーザー情報取得
   getMe: () => api.get('/user'),
+};
+
+// お知らせ関連API
+export const notificationAPI = {
+  // お知らせ一覧取得
+  getAll: () => api.get('/notifications'),
+
+  // 個別お知らせ取得
+  getById: (id) => api.get(`/notifications/${id}`),
+
+  // お知らせを既読にする
+  markAsRead: (id) => api.post(`/notifications/${id}/read`),
+
+  // 未読件数取得
+  getUnreadCount: () => api.get('/notifications/unread-count'),
+};
+
+// お問い合わせ関連API
+export const inquiryAPI = {
+  // お問い合わせ一覧取得
+  getAll: () => api.get('/inquiries'),
+
+  // 個別お問い合わせ取得
+  getById: (id) => api.get(`/inquiries/${id}`),
+
+  // お問い合わせ作成
+  create: (data) => api.post('/inquiries', data),
+};
+
+// プロフィール関連API
+export const profileAPI = {
+  // プロフィール取得
+  get: () => api.get('/profile'),
+
+  // プロフィール更新
+  update: (data) => api.put('/profile', data),
 };
 
 export default api;
