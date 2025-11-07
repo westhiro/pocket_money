@@ -15,7 +15,7 @@ class AssetHistorySeeder extends Seeder
      */
     public function run(): void
     {
-        $this->command->info('過去7日分の資産履歴を生成します（各日の終値のみ）...');
+s        $this->command->info('過去7日分の資産履歴を生成します（各日の終値のみ）...');
 
         // 既存の資産履歴を削除
         DB::table('asset_histories')->delete();

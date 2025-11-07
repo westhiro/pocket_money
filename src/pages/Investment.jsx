@@ -3,9 +3,15 @@ import { formatCurrency } from '../utils/format'
 import { stocksAPI } from '../services/api'
 import StockChart from '../components/StockChart'
 import TradingModal from '../components/TradingModal'
+import RealEstateList from '../components/RealEstateList'
 import './Investment.css'
 
 const Investment = () => {
+  // localStorageから最後に表示していた投資タイプを取得
+  const [investmentType, setInvestmentType] = useState(() => {
+    const savedType = localStorage.getItem('lastInvestmentType')
+    return savedType || 'stock' // デフォルトは'stock'
+  })
   const [stocks, setStocks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -66,6 +72,11 @@ const Investment = () => {
       localStorage.setItem('lastSelectedStockId', selectedStock.id.toString())
     }
   }, [selectedStock])
+
+  // 投資タイプが変更されたらlocalStorageに保存
+  useEffect(() => {
+    localStorage.setItem('lastInvestmentType', investmentType)
+  }, [investmentType])
 
   const handleSort = (column) => {
     if (sortBy === column) {
@@ -140,87 +151,114 @@ const Investment = () => {
 
   return (
     <div className="investment-page">
-      <div className="investment-content">
-        <div className="chart-section">
-          {selectedStock && (
-            <StockChart
-              stock={selectedStock}
-              onBuy={() => handleBuy(selectedStock)}
-              onSell={() => handleSell(selectedStock)}
-            />
-          )}
-        </div>
-
-        <div className="stocks-section">
-          <div className="section-header">
-            <h2>銘柄一覧</h2>
-          </div>
-
-          <div className="stocks-table-container">
-            <table className="stocks-table">
-              <thead>
-                <tr>
-                  <th onClick={() => handleSort('company')} className="sortable">
-                    銘柄 {sortBy === 'company' && (sortOrder === 'asc' ? '↑' : '↓')}
-                  </th>
-                  <th>業種</th>
-                  <th onClick={() => handleSort('price')} className="sortable">
-                    株価 {sortBy === 'price' && (sortOrder === 'asc' ? '↑' : '↓')}
-                  </th>
-                  <th onClick={() => handleSort('changePercent')} className="sortable">
-                    前日比 {sortBy === 'changePercent' && (sortOrder === 'asc' ? '↑' : '↓')}
-                  </th>
-                  <th>チャート</th>
-                  <th>売買</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedStocks.map(stock => (
-                  <tr key={stock.id} className={selectedStock?.id === stock.id ? 'selected' : ''}>
-                    <td>
-                      <div className="stock-info">
-                        <div className="stock-name">{stock.company}</div>
-                        <div className="stock-code">{stock.code}</div>
-                      </div>
-                    </td>
-                    <td className="sector">{stock.sector}</td>
-                    <td className="price">{formatCurrency(stock.price)}</td>
-                    <td className={`change ${stock.change >= 0 ? 'positive' : 'negative'}`}>
-                      {stock.change >= 0 ? '+' : ''}{stock.change}
-                      <br />
-                      ({stock.changePercent >= 0 ? '+' : ''}{stock.changePercent}%)
-                    </td>
-                    <td>
-                      <button
-                        className="chart-button"
-                        onClick={() => setSelectedStock(stock)}
-                      >
-                        📈
-                      </button>
-                    </td>
-                    <td>
-                      <div className="trade-buttons">
-                        <button
-                          className="buy-btn"
-                          onClick={() => handleBuy(stock)}
-                        >
-                          買
-                        </button>
-                        <button
-                          className="sell-btn"
-                          onClick={() => handleSell(stock)}
-                        >
-                          売
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+      <div className="investment-type-toggle">
+        <button
+          className={`toggle-btn ${investmentType === 'stock' ? 'active' : ''}`}
+          onClick={() => setInvestmentType('stock')}
+        >
+          株式
+        </button>
+        <button
+          className={`toggle-btn ${investmentType === 'realEstate' ? 'active' : ''}`}
+          onClick={() => setInvestmentType('realEstate')}
+        >
+          不動産
+        </button>
       </div>
+
+      {investmentType === 'stock' ? (
+        <div className="investment-content">
+          <div className="chart-section">
+            {selectedStock && (
+              <StockChart
+                stock={selectedStock}
+                onBuy={() => handleBuy(selectedStock)}
+                onSell={() => handleSell(selectedStock)}
+              />
+            )}
+          </div>
+
+          <div className="stocks-section">
+            <div className="section-header">
+              <h2>銘柄一覧</h2>
+            </div>
+
+            <div className="stocks-table-container">
+              <table className="stocks-table">
+                <thead>
+                  <tr>
+                    <th onClick={() => handleSort('company')} className="sortable">
+                      銘柄 {sortBy === 'company' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th>業種</th>
+                    <th onClick={() => handleSort('price')} className="sortable">
+                      株価 {sortBy === 'price' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th onClick={() => handleSort('changePercent')} className="sortable">
+                      前日比 {sortBy === 'changePercent' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th>チャート</th>
+                    <th>売買</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedStocks.map(stock => (
+                    <tr key={stock.id} className={selectedStock?.id === stock.id ? 'selected' : ''}>
+                      <td>
+                        <div className="stock-info">
+                          <div className="stock-name">{stock.company}</div>
+                          <div className="stock-code">{stock.code}</div>
+                        </div>
+                      </td>
+                      <td className="sector">{stock.sector}</td>
+                      <td className="price">{formatCurrency(stock.price)}</td>
+                      <td className={`change ${stock.change >= 0 ? 'positive' : 'negative'}`}>
+                        {stock.change >= 0 ? '+' : ''}{stock.change}
+                        <br />
+                        ({stock.changePercent >= 0 ? '+' : ''}{stock.changePercent}%)
+                      </td>
+                      <td>
+                        <button
+                          className="chart-button"
+                          onClick={() => setSelectedStock(stock)}
+                        >
+                          📈
+                        </button>
+                      </td>
+                      <td>
+                        <div className="trade-buttons">
+                          <button
+                            className="buy-btn"
+                            onClick={() => handleBuy(stock)}
+                          >
+                            買
+                          </button>
+                          <button
+                            className="sell-btn"
+                            onClick={() => handleSell(stock)}
+                          >
+                            売
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="investment-content">
+          <div className="real-estate-container">
+            <div className="interest-rate-display">
+              <span className="interest-rate-label">現在の金利:</span>
+              <span className="interest-rate-value">2.5%</span>
+            </div>
+            <RealEstateList />
+          </div>
+        </div>
+      )}
 
       <TradingModal
         isOpen={modalState.isOpen}

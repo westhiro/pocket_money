@@ -1,0 +1,178 @@
+.real-estate-section {
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+  margin-bottom: 20px;
+}
+
+.section-header h2 {
+  font-size: 20px;
+  color: #333;
+  margin: 0;
+}
+
+.properties-table-container {
+  overflow-x: auto;
+}
+
+.properties-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.properties-table thead {
+  background: linear-gradient(135deg, #1976D2 0%, #2196F3 100%);
+  color: white;
+}
+
+.properties-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.properties-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.properties-table th.sortable:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.properties-table tbody tr {
+  border-bottom: 1px solid #e0e0e0;
+  transition: background 0.2s;
+}
+
+.properties-table tbody tr:hover {
+  background: #f5f5f5;
+}
+
+.properties-table td {
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+.property-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.property-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 15px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.status-badge.occupied {
+  background: #e3f2fd;
+  color: #1976D2;
+}
+
+.status-badge.vacant {
+  background: #fce4ec;
+  color: #c2185b;
+}
+
+.rental-income {
+  color: #4CAF50;
+  font-weight: 600;
+}
+
+.loan-balance {
+  color: #f44336;
+  font-weight: 600;
+}
+
+.demand-indicator {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.demand-indicator.demand-up {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.demand-indicator.demand-down {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.sell-property-btn {
+  padding: 6px 16px;
+  background: linear-gradient(135deg, #f44336 0%, #e53935 100%);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(244, 67, 54, 0.3);
+}
+
+.sell-property-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(244, 67, 54, 0.4);
+}
+
+.sell-property-btn:active {
+  transform: translateY(0);
+}
+
+.no-properties {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+.no-properties p {
+  margin: 0;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .real-estate-section {
+    padding: 15px;
+  }
+
+  .properties-table {
+    font-size: 12px;
+  }
+
+  .properties-table th,
+  .properties-table td {
+    padding: 8px 10px;
+  }
+
+  .property-name {
+    font-size: 13px;
+  }
+
+  .status-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+}

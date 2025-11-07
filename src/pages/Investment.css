@@ -4,6 +4,42 @@
   margin: 0 auto;
 }
 
+.investment-type-toggle {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  justify-content: center;
+  padding: 8px;
+}
+
+.investment-type-toggle .toggle-btn {
+  flex: 1;
+  max-width: 200px;
+  padding: 12px 24px;
+  border: 2px solid #e0e0e0;
+  background: white;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #666;
+}
+
+.investment-type-toggle .toggle-btn:hover {
+  border-color: #2196F3;
+  color: #2196F3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(33, 150, 243, 0.2);
+}
+
+.investment-type-toggle .toggle-btn.active {
+  background: linear-gradient(135deg, #1976D2 0%, #2196F3 100%);
+  border-color: #1976D2;
+  color: white;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+}
+
 .investment-header {
   background: linear-gradient(135deg, #1976D2 0%, #2196F3 100%);
   color: white;
@@ -281,37 +317,96 @@
   width: 100%;
 }
 
+.real-estate-container {
+  position: relative;
+  padding-top: 40px;
+}
+
+.real-estate-container .interest-rate-display {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #1976D2 0%, #2196F3 100%);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.real-estate-container .interest-rate-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.real-estate-container .interest-rate-value {
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+}
+
 @media (max-width: 768px) {
   .investment-page {
     padding: 0.5rem;
   }
-  
+
+  .investment-type-toggle {
+    padding: 6px;
+    gap: 8px;
+  }
+
+  .investment-type-toggle .toggle-btn {
+    padding: 10px 16px;
+    font-size: 14px;
+    max-width: none;
+  }
+
+  .real-estate-container {
+    padding-top: 35px;
+  }
+
+  .real-estate-container .interest-rate-display {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .real-estate-container .interest-rate-label {
+    font-size: 11px;
+  }
+
+  .real-estate-container .interest-rate-value {
+    font-size: 14px;
+  }
+
   .investment-header {
     padding: 1.5rem;
   }
-  
+
   .investment-header h1 {
     font-size: 1.5rem;
   }
-  
+
   .market-summary {
     gap: 1rem;
   }
-  
+
   .section-header {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .stocks-table {
     font-size: 0.75rem;
   }
-  
+
   .stocks-table th,
   .stocks-table td {
     padding: 0.75rem 0.5rem;
   }
-  
+
   .trade-buttons {
     flex-direction: column;
     gap: 0.25rem;

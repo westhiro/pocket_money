@@ -1,0 +1,240 @@
+.real-estate-map {
+  margin-top: 20px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.map-header {
+  margin-bottom: 15px;
+}
+
+.map-header h2 {
+  font-size: 20px;
+  color: #333;
+  margin: 0;
+}
+
+.map-container {
+  position: relative;
+  width: 100%;
+  background: #a9a9a9;
+  border-radius: 40px;
+  overflow: visible;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.map-svg {
+  width: 100%;
+  height: 500px;
+  display: block;
+  border-radius: 20px;
+}
+
+.property-pin {
+  /* アニメーション削除 */
+}
+
+/* 物件情報ポップアップ */
+.property-popup {
+  position: absolute;
+  z-index: 100;
+  transform: translate(-50%, -100%);
+  margin-top: -50px;
+  animation: popupFadeIn 0.3s ease-out;
+  pointer-events: auto;
+  max-width: calc(100% - 40px);
+}
+
+/* ピンの下に表示する場合 */
+.property-popup.popup-below {
+  transform: translate(-50%, 0);
+  margin-top: 0;
+  animation: popupFadeInBelow 0.3s ease-out;
+}
+
+.property-popup.popup-below .popup-arrow {
+  bottom: auto;
+  top: -12px;
+  border-top: none;
+  border-bottom: 12px solid #E53935;
+}
+
+.property-popup.popup-below .popup-arrow::after {
+  bottom: auto;
+  top: -7px;
+  border-top: none;
+  border-bottom: 10px solid white;
+}
+
+@keyframes popupFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -90%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+}
+
+@keyframes popupFadeInBelow {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.popup-content {
+  background: white;
+  border: 3px solid #E53935;
+  border-radius: 8px;
+  padding: 15px;
+  min-width: 300px;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.popup-content h3 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  color: #333;
+  font-weight: bold;
+}
+
+.popup-details {
+  margin-bottom: 12px;
+}
+
+.popup-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.popup-label {
+  color: #666;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.popup-value {
+  color: #333;
+  font-weight: 600;
+  text-align: right;
+}
+
+.popup-value.demand-up {
+  color: #4CAF50;
+}
+
+.popup-value.demand-down {
+  color: #f44336;
+}
+
+.popup-arrow {
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 12px solid #E53935;
+}
+
+.popup-arrow::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: -10px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid white;
+}
+
+.btn-purchase-popup {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+}
+
+.btn-purchase-popup:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4);
+}
+
+.owned-badge {
+  width: 100%;
+  padding: 10px;
+  background: #2196F3;
+  color: white;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .real-estate-map {
+    padding: 15px;
+    margin-top: 15px;
+  }
+
+  .map-header h2 {
+    font-size: 18px;
+  }
+
+  .map-container {
+    border-radius: 30px;
+    padding: 15px;
+  }
+
+  .map-svg {
+    height: 350px;
+    border-radius: 15px;
+  }
+
+  .popup-content {
+    min-width: 250px;
+    padding: 12px;
+  }
+
+  .popup-content h3 {
+    font-size: 16px;
+  }
+
+  .popup-row {
+    font-size: 13px;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .popup-label {
+    font-size: 12px;
+  }
+
+  .popup-value {
+    text-align: left;
+  }
+}
