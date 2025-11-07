@@ -104,15 +104,7 @@ const RealEstatePortfolio = () => {
     animation: false,
     plugins: {
       legend: {
-        position: 'top',
-        labels: {
-          font: {
-            size: 12,
-            family: "'Helvetica Neue', 'Arial', sans-serif"
-          },
-          padding: 15,
-          usePointStyle: true
-        }
+        display: false
       },
       title: {
         display: false
@@ -190,6 +182,24 @@ const RealEstatePortfolio = () => {
     <div className="real-estate-portfolio">
       <div className="portfolio-header">
         <h2>ポートフォリオ（直近8ヶ月）</h2>
+      </div>
+      <div className="portfolio-legend">
+        <div className="legend-item">
+          <span className="legend-color" style={{ backgroundColor: '#ef5350' }}></span>
+          <span className="legend-label">ローン</span>
+        </div>
+        <div className="legend-item">
+          <span className="legend-color" style={{ backgroundColor: '#ffb74d' }}></span>
+          <span className="legend-label">金利</span>
+        </div>
+        <div className="legend-item">
+          <span className="legend-color" style={{ backgroundColor: '#fff176' }}></span>
+          <span className="legend-label">管理費・修繕積立金</span>
+        </div>
+        <div className="legend-item">
+          <span className="legend-color" style={{ backgroundColor: '#4fc3f7' }}></span>
+          <span className="legend-label">利益</span>
+        </div>
       </div>
       <div className="portfolio-chart-container">
         <Bar data={chartData} options={options} />

@@ -115,7 +115,6 @@
 
 .popup-row {
   display: flex;
-  justify-content: space-between;
   padding: 6px 0;
   font-size: 14px;
   line-height: 1.4;
@@ -125,12 +124,15 @@
   color: #666;
   font-weight: 500;
   flex-shrink: 0;
+  width: 160px;
+  text-align: left;
 }
 
 .popup-value {
   color: #333;
   font-weight: 600;
-  text-align: right;
+  text-align: left;
+  flex: 1;
 }
 
 .popup-value.demand-up {
