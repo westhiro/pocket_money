@@ -186,4 +186,57 @@ export const profileAPI = {
   update: (data) => api.put('/profile', data),
 };
 
+// 不動産関連API
+export const realEstateAPI = {
+  // 物件一覧取得
+  getAll: (params = {}) => {
+    const queryParams = new URLSearchParams()
+    if (params.status) queryParams.append('status', params.status)
+    if (params.property_type) queryParams.append('property_type', params.property_type)
+    if (params.land_demand) queryParams.append('land_demand', params.land_demand)
+    if (params.building_age) queryParams.append('building_age', params.building_age)
+    if (params.min_price) queryParams.append('min_price', params.min_price)
+    if (params.max_price) queryParams.append('max_price', params.max_price)
+    return api.get(`/real-estates?${queryParams}`)
+  },
+
+  // 個別物件詳細取得
+  getById: (id) => api.get(`/real-estates/${id}`),
+
+  // 現在の金利取得
+  getCurrentInterestRate: () => api.get('/real-estates/current-interest-rate'),
+};
+
+// 不動産取引API
+export const realEstateTradingAPI = {
+  // 不動産購入
+  buy: (realEstateId, userId, downPayment = 0, loanPeriodWeeks = 480, monthlyRent = null) =>
+    api.post('/real-estate-trading/buy', {
+      real_estate_id: realEstateId,
+      user_id: userId,
+      down_payment: downPayment,
+      loan_period_weeks: loanPeriodWeeks,
+      monthly_rent: monthlyRent
+    }),
+
+  // 不動産売却
+  sell: (userRealEstateId, userId) =>
+    api.post('/real-estate-trading/sell', {
+      user_real_estate_id: userRealEstateId,
+      user_id: userId
+    }),
+
+  // ポートフォリオ取得
+  getPortfolio: (userId) =>
+    api.get('/real-estate-trading/portfolio', {
+      params: { user_id: userId }
+    }),
+
+  // 取引履歴取得
+  getHistory: (userId, limit = 50) =>
+    api.get('/real-estate-trading/history', {
+      params: { user_id: userId, limit }
+    }),
+};
+
 export default api;

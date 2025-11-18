@@ -8,21 +8,32 @@ class Stock extends Model
 {
     protected $fillable = [
         'industry_id',
-        'company_name', 
+        'company_name',
         'stock_symbol',
         'current_price',
         'description',
         'logo_url',
         'min_price',
         'max_price',
-        'last_updated_at'
+        'last_updated_at',
+        'current_trend',
+        'trend_updated_at',
+        'needs_correction',
+        'last_change_percentage',
+        'in_emergency_event',
+        'needs_event_recovery'
     ];
 
     protected $casts = [
         'current_price' => 'decimal:2',
         'min_price' => 'decimal:2',
         'max_price' => 'decimal:2',
-        'last_updated_at' => 'datetime'
+        'last_updated_at' => 'datetime',
+        'trend_updated_at' => 'datetime',
+        'needs_correction' => 'boolean',
+        'last_change_percentage' => 'decimal:2',
+        'in_emergency_event' => 'boolean',
+        'needs_event_recovery' => 'boolean'
     ];
 
     // リレーション: 業界

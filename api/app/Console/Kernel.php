@@ -17,6 +17,8 @@ class Kernel extends ConsoleKernel
         Commands\GenerateStockHistory::class,
         Commands\CleanOldNews::class,
         Commands\TriggerMarketEvents::class,
+        Commands\ProcessWeeklyRealEstate::class,
+        Commands\ProcessMonthlyRealEstate::class,
     ];
 
     /**
@@ -54,6 +56,22 @@ class Kernel extends ConsoleKernel
                 ->dailyAt('03:00')
                 ->timezone('Asia/Tokyo')
                 ->appendOutputTo(storage_path('logs/news-cleanup.log'));
+
+        // 週次不動産処理（毎週月曜日 午前0時に実行）
+        $schedule->command('real-estate:process-weekly')
+                ->weeklyOn(1, '00:00')
+                ->timezone('Asia/Tokyo')
+                ->withoutOverlapping()
+                ->runInBackground()
+                ->appendOutputTo(storage_path('logs/real-estate-weekly.log'));
+
+        // 月次不動産処理（毎月1日 午前0時に実行）
+        $schedule->command('real-estate:process-monthly')
+                ->monthlyOn(1, '00:00')
+                ->timezone('Asia/Tokyo')
+                ->withoutOverlapping()
+                ->runInBackground()
+                ->appendOutputTo(storage_path('logs/real-estate-monthly.log'));
     }
 
     /**

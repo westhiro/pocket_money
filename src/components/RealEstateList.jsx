@@ -1,47 +1,49 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { formatCurrency } from '../utils/format'
+import { realEstateTradingAPI } from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
 import RealEstatePortfolio from './RealEstatePortfolio'
 import RealEstateMap from './RealEstateMap'
 import './RealEstateList.css'
 
 const RealEstateList = () => {
-  const [sortBy, setSortBy] = useState('property')
+  const { isAuthenticated, user } = useAuth()
+  const [sortBy, setSortBy] = useState('property_name')
   const [sortOrder, setSortOrder] = useState('asc')
   const [selectedProperty, setSelectedProperty] = useState(null)
+  const [properties, setProperties] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [showSellModal, setShowSellModal] = useState(false)
+  const [propertyToSell, setPropertyToSell] = useState(null)
+  const [selling, setSelling] = useState(false)
 
-  // モックデータ
-  const mockProperties = [
-    {
-      id: 1,
-      name: '渋谷マンション',
-      status: '居住中',
-      rentalIncome: 150,
-      loanBalance: 25000,
-      demand: 'up',
-      purchasePrice: 30000,
-      currentValue: 32000
-    },
-    {
-      id: 2,
-      name: '新宿アパート',
-      status: '空室中',
-      rentalIncome: 0,
-      loanBalance: 18000,
-      demand: 'down',
-      purchasePrice: 20000,
-      currentValue: 19500
-    },
-    {
-      id: 3,
-      name: '池袋オフィスビル',
-      status: '居住中',
-      rentalIncome: 300,
-      loanBalance: 45000,
-      demand: 'up',
-      purchasePrice: 50000,
-      currentValue: 55000
+  // ユーザーの保有物件を取得
+  useEffect(() => {
+    const fetchProperties = async () => {
+      if (!isAuthenticated || !user) {
+        setProperties([])
+        setLoading(false)
+        return
+      }
+
+      try {
+        setLoading(true)
+        const response = await realEstateTradingAPI.getPortfolio(user.id)
+
+        if (response.data.success) {
+          setProperties(response.data.data.holdings || [])
+        }
+      } catch (err) {
+        console.error('Properties fetch error:', err)
+        setError('保有物件の取得に失敗しました: ' + err.message)
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
+
+    fetchProperties()
+  }, [isAuthenticated, user])
 
   const handleSort = (column) => {
     if (sortBy === column) {
@@ -52,7 +54,7 @@ const RealEstateList = () => {
     }
   }
 
-  const sortedProperties = [...mockProperties].sort((a, b) => {
+  const sortedProperties = [...properties].sort((a, b) => {
     let aVal = a[sortBy]
     let bVal = b[sortBy]
 
@@ -69,9 +71,96 @@ const RealEstateList = () => {
   })
 
   const handleSell = (property) => {
-    setSelectedProperty(property)
-    // TODO: 売却モーダルを表示
-    alert(`${property.name}の売却機能は実装予定です`)
+    setPropertyToSell(property)
+    setShowSellModal(true)
+  }
+
+  const confirmSell = async () => {
+    if (!propertyToSell || !user) return
+
+    setSelling(true)
+    try {
+      const response = await realEstateTradingAPI.sell(propertyToSell.id, user.id)
+
+      if (response.data.success) {
+        alert(`${propertyToSell.property_name}を売却しました！\n売却益: ${formatCurrency(response.data.data.net_proceeds)}`)
+
+        // 物件リストを再取得
+        const portfolioResponse = await realEstateTradingAPI.getPortfolio(user.id)
+        if (portfolioResponse.data.success) {
+          setProperties(portfolioResponse.data.data.holdings || [])
+        }
+
+        setShowSellModal(false)
+        setPropertyToSell(null)
+      } else {
+        alert('売却に失敗しました: ' + response.data.message)
+      }
+    } catch (err) {
+      console.error('Sell error:', err)
+      alert('売却処理中にエラーが発生しました: ' + (err.response?.data?.message || err.message))
+    } finally {
+      setSelling(false)
+    }
+  }
+
+  const cancelSell = () => {
+    setShowSellModal(false)
+    setPropertyToSell(null)
+  }
+
+  // ローディング表示
+  if (loading) {
+    return (
+      <>
+        <div className="real-estate-section">
+          <div className="section-header">
+            <h2>保有物件</h2>
+          </div>
+          <div className="loading" style={{ textAlign: 'center', padding: '50px' }}>
+            データを読み込み中...
+          </div>
+        </div>
+        <RealEstatePortfolio />
+        <RealEstateMap />
+      </>
+    )
+  }
+
+  // エラー表示
+  if (error) {
+    return (
+      <>
+        <div className="real-estate-section">
+          <div className="section-header">
+            <h2>保有物件</h2>
+          </div>
+          <div className="error" style={{ textAlign: 'center', padding: '50px', color: 'red' }}>
+            {error}
+          </div>
+        </div>
+        <RealEstatePortfolio />
+        <RealEstateMap />
+      </>
+    )
+  }
+
+  // 未認証表示
+  if (!isAuthenticated) {
+    return (
+      <>
+        <div className="real-estate-section">
+          <div className="section-header">
+            <h2>保有物件</h2>
+          </div>
+          <div className="no-properties">
+            <p>ログインして保有物件を確認しましょう</p>
+          </div>
+        </div>
+        <RealEstatePortfolio />
+        <RealEstateMap />
+      </>
+    )
   }
 
   return (
@@ -85,20 +174,20 @@ const RealEstateList = () => {
           <table className="properties-table">
             <thead>
               <tr>
-                <th onClick={() => handleSort('name')} className="sortable">
-                  物件 {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+                <th onClick={() => handleSort('property_name')} className="sortable">
+                  物件 {sortBy === 'property_name' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </th>
-                <th onClick={() => handleSort('status')} className="sortable">
-                  物件状態 {sortBy === 'status' && (sortOrder === 'asc' ? '↑' : '↓')}
+                <th onClick={() => handleSort('vacancy_rate')} className="sortable">
+                  物件状態 {sortBy === 'vacancy_rate' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </th>
-                <th onClick={() => handleSort('rentalIncome')} className="sortable">
-                  家賃収入 {sortBy === 'rentalIncome' && (sortOrder === 'asc' ? '↑' : '↓')}
+                <th onClick={() => handleSort('weekly_net_rent')} className="sortable">
+                  家賃収入 {sortBy === 'weekly_net_rent' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </th>
-                <th onClick={() => handleSort('loanBalance')} className="sortable">
-                  ローン残高 {sortBy === 'loanBalance' && (sortOrder === 'asc' ? '↑' : '↓')}
+                <th onClick={() => handleSort('loan_balance')} className="sortable">
+                  ローン残高 {sortBy === 'loan_balance' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </th>
-                <th onClick={() => handleSort('demand')} className="sortable">
-                  需要 {sortBy === 'demand' && (sortOrder === 'asc' ? '↑' : '↓')}
+                <th onClick={() => handleSort('land_demand')} className="sortable">
+                  需要 {sortBy === 'land_demand' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </th>
                 <th>売却</th>
               </tr>
@@ -108,21 +197,21 @@ const RealEstateList = () => {
                 <tr key={property.id}>
                   <td>
                     <div className="property-info">
-                      <div className="property-name">{property.name}</div>
+                      <div className="property-name">{property.property_name}</div>
                     </div>
                   </td>
                   <td>
-                    <span className={`status-badge ${property.status === '居住中' ? 'occupied' : 'vacant'}`}>
-                      {property.status}
+                    <span className={`status-badge ${property.vacancy_rate < 10 ? 'occupied' : 'vacant'}`}>
+                      {property.vacancy_rate < 10 ? '居住中' : '空室中'}
                     </span>
                   </td>
                   <td className="rental-income">
-                    {property.rentalIncome > 0 ? formatCurrency(property.rentalIncome) : '-'}
+                    {property.weekly_net_rent > 0 ? formatCurrency(property.weekly_net_rent) : '-'}
                   </td>
-                  <td className="loan-balance">{formatCurrency(property.loanBalance)}</td>
+                  <td className="loan-balance">{formatCurrency(property.loan_balance)}</td>
                   <td>
-                    <span className={`demand-indicator ${property.demand === 'up' ? 'demand-up' : 'demand-down'}`}>
-                      {property.demand === 'up' ? '上昇中 ↑' : '減少中 ↓'}
+                    <span className={`demand-indicator ${property.land_demand === 'rising' ? 'demand-up' : property.land_demand === 'falling' ? 'demand-down' : 'demand-normal'}`}>
+                      {property.land_demand === 'rising' ? '上昇中 ↑' : property.land_demand === 'falling' ? '減少中 ↓' : '普通 →'}
                     </span>
                   </td>
                   <td>
@@ -149,6 +238,55 @@ const RealEstateList = () => {
       <RealEstatePortfolio />
 
       <RealEstateMap />
+
+      {/* 売却確認モーダル */}
+      {showSellModal && propertyToSell && (
+        <div className="modal-overlay" onClick={cancelSell}>
+          <div className="sell-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>物件売却確認</h2>
+              <button className="close-button" onClick={cancelSell}>
+                ✕
+              </button>
+            </div>
+            <div className="modal-body">
+              <p>以下の物件を売却しますか？</p>
+              <div className="property-details">
+                <div className="detail-row">
+                  <span className="label">物件名:</span>
+                  <span className="value">{propertyToSell.property_name}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">購入価格:</span>
+                  <span className="value">{formatCurrency(propertyToSell.purchase_price)}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">ローン残高:</span>
+                  <span className="value">{formatCurrency(propertyToSell.loan_balance)}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">予想売却価格:</span>
+                  <span className="value">{formatCurrency(propertyToSell.current_value)}</span>
+                </div>
+                <div className="detail-row profit-loss">
+                  <span className="label">予想純利益:</span>
+                  <span className={`value ${propertyToSell.equity >= 0 ? 'positive' : 'negative'}`}>
+                    {propertyToSell.equity >= 0 ? '+' : ''}{formatCurrency(propertyToSell.equity)}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="cancel-btn" onClick={cancelSell} disabled={selling}>
+                キャンセル
+              </button>
+              <button className="confirm-btn sell" onClick={confirmSell} disabled={selling}>
+                {selling ? '売却中...' : '売却確定'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

@@ -9,6 +9,8 @@ use App\Http\Controllers\API\NewsController;
 use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\InquiryController;
 use App\Http\Controllers\API\ProfileController;
+use App\Http\Controllers\API\RealEstateController;
+use App\Http\Controllers\API\RealEstateTradingController;
 use App\Http\Controllers\Auth\AuthController;
 
 // 認証関連API（認証不要）
@@ -45,6 +47,21 @@ Route::prefix('stocks')->group(function () {
     Route::get('/{id}', [StockController::class, 'show']); // 個別株式詳細
     Route::get('/{id}/chart/{period}', [StockController::class, 'chart']); // チャートデータ
     Route::get('/industry/{industryId}', [StockController::class, 'byIndustry']); // 業界別株式
+});
+
+// 不動産関連API（認証不要）
+Route::prefix('real-estates')->group(function () {
+    Route::get('/', [RealEstateController::class, 'index']); // 物件一覧
+    Route::get('/current-interest-rate', [RealEstateController::class, 'getCurrentInterestRate']); // 現在の金利
+    Route::get('/{id}', [RealEstateController::class, 'show']); // 物件詳細
+});
+
+// 不動産取引API（認証不要 - user_idベース）
+Route::prefix('real-estate-trading')->group(function () {
+    Route::post('/buy', [RealEstateTradingController::class, 'buy']); // 不動産購入
+    Route::post('/sell', [RealEstateTradingController::class, 'sell']); // 不動産売却
+    Route::get('/portfolio', [RealEstateTradingController::class, 'portfolio']); // ポートフォリオ取得
+    Route::get('/history', [RealEstateTradingController::class, 'history']); // 取引履歴
 });
 
 // ニュース関連API（認証不要）

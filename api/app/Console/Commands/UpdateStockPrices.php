@@ -298,8 +298,8 @@ class UpdateStockPrices extends Command
                 'trend_updated_at' => now()
             ]);
 
-            // トレンド変更のニュースは作成しない（イベントベースのニュースのみ表示）
-            // $this->createTrendNews($stock, $newTrend);
+            // トレンド変更のニュースを作成
+            $this->createTrendNews($stock, $newTrend);
         }
 
         // トレンドに基づいた変動

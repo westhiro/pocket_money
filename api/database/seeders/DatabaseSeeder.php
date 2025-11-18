@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             StockSeeder::class,
             LearningVideoSeeder::class,
             EventSeeder::class,
+            InterestRateSeeder::class,
+            RealEstateSeeder::class,
         ]);
 
         // テストユーザー作成（既存の場合はスキップ）

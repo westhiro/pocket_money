@@ -4,12 +4,13 @@ import { tradingAPI } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
 import './TradingModal.css'
 
-const TradingModal = ({ 
-  isOpen, 
-  onClose, 
-  stock, 
+const TradingModal = ({
+  isOpen,
+  onClose,
+  stock,
   tradeType, // 'buy' or 'sell'
-  currentHoldings = 0 
+  currentHoldings = 0,
+  onTradeSuccess // 取引成功時のコールバック
 }) => {
   const { user, updateCoinBalance } = useAuth()
   const [quantity, setQuantity] = useState(1)
@@ -57,10 +58,15 @@ const TradingModal = ({
       
       if (response.data.success) {
         const action = tradeType === 'buy' ? '購入' : '売却'
-        
+
         // コイン残高を更新
         updateCoinBalance(response.data.data.remaining_coins)
-        
+
+        // 取引成功時のコールバックを呼び出し（保有株データを更新）
+        if (onTradeSuccess) {
+          onTradeSuccess()
+        }
+
         setResultMessage(
           `${stock.company}を${quantity}株${action}しました！\n` +
           `総額: ${formatCurrency(response.data.data.total_amount)}\n` +

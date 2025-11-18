@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from 'react'
 import { formatCurrency } from '../utils/format'
-import { stocksAPI } from '../services/api'
+import { stocksAPI, userAPI, realEstateAPI } from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
 import StockChart from '../components/StockChart'
 import TradingModal from '../components/TradingModal'
 import RealEstateList from '../components/RealEstateList'
 import './Investment.css'
 
 const Investment = () => {
+  const { isAuthenticated } = useAuth()
+
   // localStorageから最後に表示していた投資タイプを取得
   const [investmentType, setInvestmentType] = useState(() => {
     const savedType = localStorage.getItem('lastInvestmentType')
     return savedType || 'stock' // デフォルトは'stock'
   })
   const [stocks, setStocks] = useState([])
+  const [userStocks, setUserStocks] = useState([]) // ユーザーの保有株データ
+  const [currentInterestRate, setCurrentInterestRate] = useState(2.5) // 現在の金利
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedStock, setSelectedStock] = useState(null)
@@ -78,6 +83,54 @@ const Investment = () => {
     localStorage.setItem('lastInvestmentType', investmentType)
   }, [investmentType])
 
+  // ユーザーの保有株データを取得
+  useEffect(() => {
+    const fetchUserStocks = async () => {
+      if (!isAuthenticated) {
+        setUserStocks([])
+        return
+      }
+
+      try {
+        const response = await userAPI.getStocks()
+        const formattedUserStocks = response.data.data.map(stock => ({
+          stock_id: stock.id,
+          quantity: stock.quantity
+        }))
+        setUserStocks(formattedUserStocks)
+      } catch (err) {
+        console.error('User stocks fetch error:', err)
+        // エラーが発生してもユーザー保有株が空になるだけで、投資ページは表示される
+        setUserStocks([])
+      }
+    }
+
+    fetchUserStocks()
+  }, [isAuthenticated])
+
+  // 現在の金利を取得
+  useEffect(() => {
+    const fetchInterestRate = async () => {
+      try {
+        const response = await realEstateAPI.getCurrentInterestRate()
+        if (response.data.success) {
+          setCurrentInterestRate(response.data.data.interest_rate)
+        }
+      } catch (err) {
+        console.error('Interest rate fetch error:', err)
+        // エラー時はデフォルト値（2.5%）を使用
+      }
+    }
+
+    fetchInterestRate()
+  }, [])
+
+  // 指定した株のユーザー保有数を取得
+  const getUserHoldings = (stockId) => {
+    const userStock = userStocks.find(us => us.stock_id === stockId)
+    return userStock ? userStock.quantity : 0
+  }
+
   const handleSort = (column) => {
     if (sortBy === column) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
@@ -125,6 +178,22 @@ const Investment = () => {
       stock: null,
       tradeType: null
     })
+  }
+
+  // 取引成功時のコールバック（保有株データを再取得）
+  const handleTradeSuccess = async () => {
+    if (isAuthenticated) {
+      try {
+        const response = await userAPI.getStocks()
+        const formattedUserStocks = response.data.data.map(stock => ({
+          stock_id: stock.id,
+          quantity: stock.quantity
+        }))
+        setUserStocks(formattedUserStocks)
+      } catch (err) {
+        console.error('User stocks refresh error:', err)
+      }
+    }
   }
 
   // ローディング表示
@@ -253,7 +322,7 @@ const Investment = () => {
           <div className="real-estate-container">
             <div className="interest-rate-display">
               <span className="interest-rate-label">現在の金利:</span>
-              <span className="interest-rate-value">2.5%</span>
+              <span className="interest-rate-value">{currentInterestRate}%</span>
             </div>
             <RealEstateList />
           </div>
@@ -265,7 +334,8 @@ const Investment = () => {
         onClose={closeModal}
         stock={modalState.stock}
         tradeType={modalState.tradeType}
-        currentHoldings={Math.floor(Math.random() * 500) + 50} // 仮の保有数
+        currentHoldings={modalState.stock ? getUserHoldings(modalState.stock.id) : 0}
+        onTradeSuccess={handleTradeSuccess}
       />
     </div>
   )

@@ -1,53 +1,76 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { formatCurrency } from '../utils/format'
+import { realEstateAPI, realEstateTradingAPI } from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
+import RealEstatePurchaseModal from './RealEstatePurchaseModal'
 import './RealEstateMap.css'
 
 const RealEstateMap = () => {
+  const { isAuthenticated, user, updateCoinBalance } = useAuth()
   const [hoveredProperty, setHoveredProperty] = useState(null)
+  const [properties, setProperties] = useState([])
+  const [userProperties, setUserProperties] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [purchasing, setPurchasing] = useState(false)
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false)
+  const [selectedPropertyForPurchase, setSelectedPropertyForPurchase] = useState(null)
+  const [currentInterestRate, setCurrentInterestRate] = useState(2.5)
 
-  // 物件データ（モック）
-  const properties = [
-    {
-      id: 1,
-      name: 'マンション①',
-      x: 320,
-      y: 140,
-      price: 5.3,
-      demand: '上昇中',
-      management: 18,
-      rent: 0.0089,
-      age: '築浅',
-      status: 'available'
-    },
-    {
-      id: 2,
-      name: 'マンション②',
-      x: 220,
-      y: 240,
-      price: 4.2,
-      demand: '減少中',
-      management: 15,
-      rent: 0.0072,
-      age: '築15年',
-      status: 'available'
-    },
-    {
-      id: 3,
-      name: 'マンション③',
-      x: 450,
-      y: 220,
-      price: 6.8,
-      demand: '上昇中',
-      management: 22,
-      rent: 0.0105,
-      age: '築浅',
-      status: 'owned'
+  // 物件データを取得
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        setLoading(true)
+
+        // 購入可能な物件を取得
+        const availableResponse = await realEstateAPI.getAll({ status: 'available' })
+        const availableProperties = availableResponse.data.data || []
+
+        // ユーザーの保有物件を取得（ログインしている場合）
+        let userPropertyIds = []
+        if (isAuthenticated && user) {
+          try {
+            const portfolioResponse = await realEstateTradingAPI.getPortfolio(user.id)
+            if (portfolioResponse.data.success) {
+              const holdings = portfolioResponse.data.data.holdings || []
+              // 保有物件のreal_estate_idを取得する必要があるため、
+              // UserRealEstateモデルから元のreal_estate_idを参照
+              // ここでは簡易的にproperty_nameで判定（本来はAPIレスポンスにreal_estate_idを含めるべき）
+              userPropertyIds = holdings.map(h => h.property_name)
+            }
+          } catch (err) {
+            console.error('User portfolio fetch error:', err)
+          }
+        }
+
+        setUserProperties(userPropertyIds)
+        setProperties(availableProperties)
+      } catch (err) {
+        console.error('Properties fetch error:', err)
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
 
-  const handlePinClick = (property) => {
-    // クリック時は何もしない（ホバーで表示するため）
-  }
+    fetchProperties()
+  }, [isAuthenticated, user])
+
+  // 現在の金利を取得
+  useEffect(() => {
+    const fetchInterestRate = async () => {
+      try {
+        const response = await realEstateAPI.getCurrentInterestRate()
+        if (response.data.success) {
+          setCurrentInterestRate(response.data.data.interest_rate)
+        }
+      } catch (err) {
+        console.error('Interest rate fetch error:', err)
+        // エラー時はデフォルト値（2.5%）を使用
+      }
+    }
+
+    fetchInterestRate()
+  }, [])
 
   const handlePinHover = (property) => {
     setHoveredProperty(property)
@@ -57,9 +80,120 @@ const RealEstateMap = () => {
     setHoveredProperty(null)
   }
 
-  const handlePurchase = () => {
-    alert(`${hoveredProperty.name}を購入しました！`)
-    setHoveredProperty(null)
+  const handleOpenPurchaseModal = () => {
+    if (!hoveredProperty || !isAuthenticated || !user) {
+      alert('ログインが必要です')
+      return
+    }
+
+    setSelectedPropertyForPurchase(hoveredProperty)
+    setShowPurchaseModal(true)
+  }
+
+  const handleClosePurchaseModal = () => {
+    setShowPurchaseModal(false)
+    setSelectedPropertyForPurchase(null)
+  }
+
+  const handlePurchaseConfirm = async (purchaseData) => {
+    if (!user) return
+
+    setPurchasing(true)
+    try {
+      const response = await realEstateTradingAPI.buy(
+        purchaseData.property_id,
+        user.id,
+        purchaseData.down_payment,
+        purchaseData.loan_period_weeks,
+        purchaseData.monthly_rent
+      )
+
+      if (response.data.success) {
+        const data = response.data.data
+        alert(
+          `${data.property_name}を購入しました！\n\n` +
+          `購入価格: ${formatCurrency(data.purchase_price)}\n` +
+          `頭金: ${formatCurrency(purchaseData.down_payment)}\n` +
+          `ローン: ${formatCurrency(data.loan_amount)}\n` +
+          `週次返済額: ${formatCurrency(data.weekly_principal)}\n` +
+          `月次家賃: ${formatCurrency(data.monthly_rent)}\n` +
+          `残りコイン: ${formatCurrency(data.remaining_coins)}`
+        )
+
+        // コイン残高を更新
+        if (updateCoinBalance) {
+          updateCoinBalance(data.remaining_coins)
+        }
+
+        // 物件リストを再取得
+        const availableResponse = await realEstateAPI.getAll({ status: 'available' })
+        setProperties(availableResponse.data.data || [])
+
+        // ユーザー保有物件を更新
+        if (user) {
+          try {
+            const portfolioResponse = await realEstateTradingAPI.getPortfolio(user.id)
+            if (portfolioResponse.data.success) {
+              const holdings = portfolioResponse.data.data.holdings || []
+              setUserProperties(holdings.map(h => h.property_name))
+            }
+          } catch (err) {
+            console.error('Portfolio refresh error:', err)
+          }
+        }
+
+        setHoveredProperty(null)
+      } else {
+        alert('購入に失敗しました: ' + response.data.message)
+      }
+    } catch (err) {
+      console.error('Purchase error:', err)
+      alert('購入処理中にエラーが発生しました: ' + (err.response?.data?.message || err.message))
+    } finally {
+      setPurchasing(false)
+    }
+  }
+
+  // 物件がユーザーに保有されているかチェック
+  const isPropertyOwned = (propertyName) => {
+    return userProperties.includes(propertyName)
+  }
+
+  // 物件の表示情報を整形
+  const formatPropertyForMap = (property) => {
+    const demandText = property.land_demand === 'rising' ? '上昇中' :
+                      property.land_demand === 'falling' ? '減少中' : '普通'
+
+    const ageText = property.building_age === 'new' ? '築浅' :
+                   property.building_age === 'semi_new' ? '築15年' : '築古'
+
+    return {
+      ...property,
+      name: property.property_name,
+      x: property.location.x,
+      y: property.location.y,
+      price: property.purchase_price,
+      demand: demandText,
+      management: property.monthly_cost / 10000, // 円→万円
+      rent: property.estimated_monthly_rent,
+      age: ageText,
+      status: isPropertyOwned(property.property_name) ? 'owned' : 'available'
+    }
+  }
+
+  const formattedProperties = properties.map(formatPropertyForMap)
+
+  if (loading) {
+    return (
+      <div className="real-estate-map">
+        <div className="map-header">
+          <h2>物件マップ</h2>
+        </div>
+        <div className="loading" style={{ textAlign: 'center', padding: '50px' }}>
+          データを読み込み中...
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -135,7 +269,7 @@ const RealEstateMap = () => {
           <rect x="620" y="280" width="110" height="55" fill="#d4cfc0" stroke="#a09880" strokeWidth="2" />
 
           {/* 物件ピン */}
-          {properties.map((property) => (
+          {formattedProperties.map((property) => (
             <g
               key={property.id}
               onMouseEnter={() => handlePinHover(property)}
@@ -184,45 +318,31 @@ const RealEstateMap = () => {
           const mapWidth = 800
           const mapHeight = 500
           const popupWidth = 320
-          const popupHeight = 260 // ポップアップの実際の高さ
-          const marginTop = 50 // CSSのmargin-topの値
-          const pinHeight = 40 // ピンの高さ
+          const popupHeight = 260
+          const marginTop = 50
+          const pinHeight = 40
 
-          // 基本位置（ピンの位置をSVG座標で取得）
           const pinX = hoveredProperty.x
           const pinY = hoveredProperty.y
 
-          // 左右の位置計算（transform: translate(-50%, -100%)を考慮）
           let leftPercent = (pinX / mapWidth) * 100
           const halfPopupWidth = popupWidth / 2
 
-          // 左にはみ出る場合
           if (pinX - halfPopupWidth < 10) {
             leftPercent = ((halfPopupWidth + 10) / mapWidth) * 100
-          }
-          // 右にはみ出る場合
-          else if (pinX + halfPopupWidth > mapWidth - 10) {
+          } else if (pinX + halfPopupWidth > mapWidth - 10) {
             leftPercent = ((mapWidth - halfPopupWidth - 10) / mapWidth) * 100
           }
 
-          // 上下の位置計算
           let topPercent = (pinY / mapHeight) * 100
           let className = 'property-popup'
 
-          // ピンの上にポップアップを表示した場合の上端位置
-          // transform: translate(-50%, -100%) により、topの位置からポップアップの高さ分上に移動
-          // さらにmargin-top: -50pxで50px上に移動
           const popupTop = pinY - popupHeight - marginTop
 
-          // 上にはみ出る場合：ピンの下に表示
           if (popupTop < 10) {
-            // ピンの下に表示する場合
             topPercent = ((pinY + pinHeight + 10) / mapHeight) * 100
             className = 'property-popup popup-below'
-          }
-          // 下にはみ出る場合もチェック（ピンの下に表示した場合）
-          else if (pinY + pinHeight + 10 + popupHeight > mapHeight - 10) {
-            // 上に表示できるスペースがある場合は上に表示
+          } else if (pinY + pinHeight + 10 + popupHeight > mapHeight - 10) {
             if (pinY - popupHeight - marginTop >= 10) {
               topPercent = (pinY / mapHeight) * 100
               className = 'property-popup'
@@ -244,21 +364,21 @@ const RealEstateMap = () => {
               <div className="popup-details">
                 <div className="popup-row">
                   <span className="popup-label">物件価格</span>
-                  <span className="popup-value">: {hoveredProperty.price}万円</span>
+                  <span className="popup-value">: {formatCurrency(hoveredProperty.price)}</span>
                 </div>
                 <div className="popup-row">
-                  <span className="popup-label">需要</span>
-                  <span className={`popup-value ${hoveredProperty.demand === '上昇中' ? 'demand-up' : 'demand-down'}`}>
+                  <span className="popup-label">土地需要</span>
+                  <span className={`popup-value ${hoveredProperty.demand === '上昇中' ? 'demand-up' : hoveredProperty.demand === '減少中' ? 'demand-down' : ''}`}>
                     : {hoveredProperty.demand}
                   </span>
                 </div>
                 <div className="popup-row">
                   <span className="popup-label">管理費・修繕積立金</span>
-                  <span className="popup-value">: {hoveredProperty.management.toLocaleString()}円</span>
+                  <span className="popup-value">: {formatCurrency(hoveredProperty.management)}/月</span>
                 </div>
                 <div className="popup-row">
-                  <span className="popup-label">家賃相場</span>
-                  <span className="popup-value">: {hoveredProperty.rent}万円</span>
+                  <span className="popup-label">予想家賃</span>
+                  <span className="popup-value">: {formatCurrency(hoveredProperty.rent)}/月</span>
                 </div>
                 <div className="popup-row">
                   <span className="popup-label">築年数</span>
@@ -266,8 +386,12 @@ const RealEstateMap = () => {
                 </div>
               </div>
               {hoveredProperty.status === 'available' && (
-                <button className="btn-purchase-popup" onClick={handlePurchase}>
-                  購入する
+                <button
+                  className="btn-purchase-popup"
+                  onClick={handleOpenPurchaseModal}
+                  disabled={!isAuthenticated}
+                >
+                  {!isAuthenticated ? 'ログインが必要' : '購入シミュレーション'}
                 </button>
               )}
               {hoveredProperty.status === 'owned' && (
@@ -279,6 +403,15 @@ const RealEstateMap = () => {
           )
         })()}
       </div>
+
+      {/* 購入モーダル */}
+      <RealEstatePurchaseModal
+        isOpen={showPurchaseModal}
+        onClose={handleClosePurchaseModal}
+        property={selectedPropertyForPurchase}
+        currentInterestRate={currentInterestRate}
+        onPurchaseSuccess={handlePurchaseConfirm}
+      />
     </div>
   )
 }
