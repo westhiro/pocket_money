@@ -72,11 +72,18 @@ const RealEstateMap = () => {
     fetchInterestRate()
   }, [])
 
-  const handlePinHover = (property) => {
-    setHoveredProperty(property)
+  const handlePinClick = (property, event) => {
+    event.stopPropagation() // マップのクリックイベントに伝播しないように
+    // 同じ物件をクリックしたら閉じる、違う物件なら開く
+    if (hoveredProperty?.id === property.id) {
+      setHoveredProperty(null)
+    } else {
+      setHoveredProperty(property)
+    }
   }
 
-  const handlePinLeave = () => {
+  const handleMapClick = () => {
+    // マップの背景をクリックしたら閉じる
     setHoveredProperty(null)
   }
 
@@ -203,7 +210,7 @@ const RealEstateMap = () => {
       </div>
 
       <div className="map-container">
-        <svg viewBox="0 0 800 500" className="map-svg" preserveAspectRatio="xMidYMid slice">
+        <svg viewBox="0 0 800 500" className="map-svg" preserveAspectRatio="xMidYMid slice" onClick={handleMapClick}>
           {/* 背景（街並み） */}
           <rect width="800" height="500" fill="#e8e4d8" />
 
@@ -272,8 +279,7 @@ const RealEstateMap = () => {
           {formattedProperties.map((property) => (
             <g
               key={property.id}
-              onMouseEnter={() => handlePinHover(property)}
-              onMouseLeave={handlePinLeave}
+              onClick={(e) => handlePinClick(property, e)}
               style={{ cursor: 'pointer' }}
               className="property-pin"
             >
@@ -356,8 +362,7 @@ const RealEstateMap = () => {
                 left: `${leftPercent}%`,
                 top: `${topPercent}%`
               }}
-              onMouseEnter={() => setHoveredProperty(hoveredProperty)}
-              onMouseLeave={handlePinLeave}
+              onClick={(e) => e.stopPropagation()}
             >
             <div className="popup-content">
               <h3>【{hoveredProperty.name}】</h3>
