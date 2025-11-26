@@ -16,15 +16,36 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // 初回ローディング時にlocalStorageからユーザー情報を取得
+  // 初回ローディング時にlocalStorageとサーバーからユーザー情報を取得
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       try {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
           const userData = JSON.parse(storedUser);
+          // まずlocalStorageのデータで表示（高速化）
           setUser(userData);
           setIsAuthenticated(true);
+
+          // サーバーから最新のユーザー情報を取得
+          try {
+            const response = await authAPI.getMe();
+            if (response.data && response.data.success) {
+              const latestUserData = response.data.data;
+              // 最新データでstateとlocalStorageを更新
+              setUser(latestUserData);
+              localStorage.setItem('user', JSON.stringify(latestUserData));
+            }
+          } catch (apiError) {
+            // API取得失敗時はlocalStorageのデータを使用
+            console.log('Failed to fetch latest user data:', apiError);
+            // 認証エラー（401）の場合はログアウト
+            if (apiError.response?.status === 401) {
+              localStorage.removeItem('user');
+              setUser(null);
+              setIsAuthenticated(false);
+            }
+          }
         }
       } catch (error) {
         console.log('Not authenticated');

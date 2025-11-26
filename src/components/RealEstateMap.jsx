@@ -251,17 +251,40 @@ const RealEstateMap = () => {
   }
 
   // ランダムに3〜8件の物件を選択して表示
-  const getRandomProperties = (allProperties) => {
-    const displayCount = Math.floor(Math.random() * 6) + 3 // 3〜8件
-    const shuffled = [...allProperties].sort(() => Math.random() - 0.5)
+  const getRandomProperties = (allProperties, seed) => {
+    // 日付をシードとした疑似ランダム生成
+    const random = (s) => {
+      const x = Math.sin(s) * 10000
+      return x - Math.floor(x)
+    }
+
+    const displayCount = Math.floor(random(seed) * 6) + 3 // 3〜8件
+
+    // シードに基づいたシャッフル
+    const shuffled = [...allProperties].sort((a, b) => {
+      const hashA = random(seed + a.id)
+      const hashB = random(seed + b.id)
+      return hashA - hashB
+    })
+
     return shuffled.slice(0, Math.min(displayCount, allProperties.length))
   }
 
-  const usedPositions = []
-  const selectedProperties = getRandomProperties(properties)
-  const formattedProperties = selectedProperties.map(property =>
-    formatPropertyForMap(property, usedPositions)
-  )
+  // 今日の日付をシードとして使用（1日ごとに変わる）
+  const today = new Date()
+  const todaySeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate()
+
+  // useMemoで1日ごとに物件を再生成（日付が変わるまで同じ配置を維持）
+  const formattedProperties = React.useMemo(() => {
+    if (properties.length === 0) return []
+
+    const usedPositions = []
+    const selectedProperties = getRandomProperties(properties, todaySeed)
+
+    return selectedProperties.map(property =>
+      formatPropertyForMap(property, usedPositions)
+    )
+  }, [properties, todaySeed])
 
   if (loading) {
     return (
