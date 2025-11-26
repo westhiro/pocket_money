@@ -415,77 +415,115 @@
     align-items: flex-start;
   }
 
+  /* カード形式に変換 */
   .stocks-table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow-x: visible;
+  }
+
+  .stocks-table thead {
+    display: none;
+  }
+
+  .stocks-table,
+  .stocks-table tbody {
+    display: block;
     width: 100%;
   }
 
-  .stocks-table {
-    font-size: 0.75rem;
-    min-width: 100%;
+  .stocks-table tr {
+    display: block;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   }
 
-  .stocks-table th,
+  .stocks-table tr.selected {
+    border-left: 4px solid #2196F3;
+    background: #E3F2FD;
+  }
+
   .stocks-table td {
-    padding: 0.75rem 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: none;
+  }
+
+  .stocks-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #666;
+    font-size: 0.85rem;
+  }
+
+  /* 銘柄セル（特別スタイル） */
+  .stocks-table td:nth-child(1) {
+    display: block;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e0e0e0;
+  }
+
+  .stocks-table td:nth-child(1)::before {
+    display: none;
+  }
+
+  .stock-info {
+    width: 100%;
+  }
+
+  .stock-name {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  /* 操作ボタンセル */
+  .stocks-table td:last-child {
+    display: block;
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .stocks-table td:last-child::before {
+    display: none;
   }
 
   .trade-buttons {
-    flex-direction: column;
-    gap: 0.25rem;
+    flex-direction: row;
+    gap: 0.5rem;
+    width: 100%;
   }
 
   .buy-btn,
   .sell-btn {
-    font-size: 0.7rem;
-    padding: 0.4rem 0.6rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .investment-page {
-    padding: 0.25rem;
+    flex: 1;
+    padding: 0.6rem;
+    font-size: 0.85rem;
   }
 
-  .stocks-section {
-    padding: 0.75rem;
+  /* チャートボタンセル */
+  .stocks-table td:nth-child(5) {
+    display: block;
+    margin-top: 0.5rem;
   }
 
-  .stocks-table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    margin: 0 -0.75rem;
-    padding: 0 0.75rem;
+  .stocks-table td:nth-child(5)::before {
+    display: none;
   }
 
-  .stocks-table {
-    min-width: 700px;
-    font-size: 0.7rem;
+  .chart-button {
+    width: 100%;
+    padding: 0.6rem;
+    font-size: 1.2rem;
   }
 
-  .stocks-table th,
-  .stocks-table td {
-    padding: 0.5rem 0.35rem;
-  }
-
-  .stock-name {
-    font-size: 0.8rem;
-  }
-
-  .stock-code {
-    font-size: 0.65rem;
-  }
-
-  .sector {
-    font-size: 0.7rem;
-  }
-
-  .price {
-    font-size: 0.8rem;
-  }
-
-  .change {
-    font-size: 0.7rem;
-  }
+  /* その他のデータ行 */
+  .stocks-table td:nth-child(2)::before { content: "業種: "; }
+  .stocks-table td:nth-child(3)::before { content: "株価: "; }
+  .stocks-table td:nth-child(4)::before { content: "前日比: "; }
 }
