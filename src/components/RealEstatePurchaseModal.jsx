@@ -235,7 +235,7 @@ const RealEstatePurchaseModal = ({
               </div>
               <div className="breakdown-row expense">
                 <span className="breakdown-label">管理費:</span>
-                <span className="breakdown-value negative">-{formatCurrency(weeklyManagementCost)}</span>
+                <span className="breakdown-value negative">-¥{weeklyManagementCost.toFixed(2)}</span>
               </div>
               <div className="breakdown-row total">
                 <span className="breakdown-label">週次純利益:</span>

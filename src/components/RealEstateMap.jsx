@@ -166,19 +166,81 @@ const RealEstateMap = () => {
     return userProperties.includes(propertyName)
   }
 
+  // マップ上でランダムな位置を生成（道路や公園を避ける）
+  const generateRandomPosition = (usedPositions) => {
+    const mapWidth = 800
+    const mapHeight = 500
+    const minDistance = 60 // 他のピンとの最小距離
+
+    // 配置可能な範囲を定義（道路や公園を避ける）
+    const validRanges = [
+      // 左上エリア
+      { xMin: 30, xMax: 250, yMin: 40, yMax: 140 },
+      // 中央上エリア
+      { xMin: 300, xMax: 540, yMin: 30, yMax: 140 },
+      // 右上エリア
+      { xMin: 600, xMax: 770, yMin: 40, yMax: 140 },
+      // 左中エリア
+      { xMin: 140, xMax: 270, yMin: 170, yMax: 240 },
+      // 中央中エリア
+      { xMin: 300, xMax: 540, yMin: 170, yMax: 240 },
+      // 右中エリア
+      { xMin: 620, xMax: 720, yMin: 170, yMax: 240 },
+      // 左下エリア（公園を避ける）
+      { xMin: 140, xMax: 270, yMin: 270, yMax: 340 },
+      // 中央下エリア
+      { xMin: 300, xMax: 540, yMin: 270, yMax: 340 },
+      // 右下エリア（公園を避ける）
+      { xMin: 480, xMax: 600, yMin: 270, yMax: 340 }
+    ]
+
+    let attempts = 0
+    const maxAttempts = 50
+
+    while (attempts < maxAttempts) {
+      // ランダムなエリアを選択
+      const range = validRanges[Math.floor(Math.random() * validRanges.length)]
+      const x = range.xMin + Math.random() * (range.xMax - range.xMin)
+      const y = range.yMin + Math.random() * (range.yMax - range.yMin)
+
+      // 他のピンとの距離をチェック
+      const tooClose = usedPositions.some(pos => {
+        const distance = Math.sqrt(Math.pow(pos.x - x, 2) + Math.pow(pos.y - y, 2))
+        return distance < minDistance
+      })
+
+      if (!tooClose) {
+        return { x: Math.round(x), y: Math.round(y) }
+      }
+
+      attempts++
+    }
+
+    // 配置できない場合はランダムな位置を返す
+    const range = validRanges[Math.floor(Math.random() * validRanges.length)]
+    return {
+      x: Math.round(range.xMin + Math.random() * (range.xMax - range.xMin)),
+      y: Math.round(range.yMin + Math.random() * (range.yMax - range.yMin))
+    }
+  }
+
   // 物件の表示情報を整形
-  const formatPropertyForMap = (property) => {
+  const formatPropertyForMap = (property, usedPositions) => {
     const demandText = property.land_demand === 'rising' ? '上昇中' :
                       property.land_demand === 'falling' ? '減少中' : '普通'
 
     const ageText = property.building_age === 'new' ? '築浅' :
                    property.building_age === 'semi_new' ? '築15年' : '築古'
 
+    // ランダムな位置を生成
+    const position = generateRandomPosition(usedPositions)
+    usedPositions.push(position)
+
     return {
       ...property,
       name: property.property_name,
-      x: property.location.x,
-      y: property.location.y,
+      x: position.x,
+      y: position.y,
       price: property.purchase_price,
       demand: demandText,
       management: property.monthly_cost / 10000, // 円→万円
@@ -188,7 +250,18 @@ const RealEstateMap = () => {
     }
   }
 
-  const formattedProperties = properties.map(formatPropertyForMap)
+  // ランダムに3〜8件の物件を選択して表示
+  const getRandomProperties = (allProperties) => {
+    const displayCount = Math.floor(Math.random() * 6) + 3 // 3〜8件
+    const shuffled = [...allProperties].sort(() => Math.random() - 0.5)
+    return shuffled.slice(0, Math.min(displayCount, allProperties.length))
+  }
+
+  const usedPositions = []
+  const selectedProperties = getRandomProperties(properties)
+  const formattedProperties = selectedProperties.map(property =>
+    formatPropertyForMap(property, usedPositions)
+  )
 
   if (loading) {
     return (

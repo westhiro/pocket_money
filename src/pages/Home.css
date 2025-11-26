@@ -1,5 +1,6 @@
 .home {
   padding: 1rem;
+  overflow-x: hidden;
 }
 
 .home-grid {
@@ -8,18 +9,24 @@
   gap: 1.5rem;
   max-width: 1200px;
   margin: 0 auto;
-}
-
-.learning-section-wrapper {
   width: 100%;
 }
 
-.assets-section-wrapper {
-  width: 100%;
-}
-
+.learning-section-wrapper,
+.assets-section-wrapper,
 .stocks-section-wrapper {
   width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
-/* すべてのセクションを同じ横幅で縦に並べる */
+/* スマホ表示時の調整 */
+@media (max-width: 768px) {
+  .home {
+    padding: 0.75rem;
+  }
+
+  .home-grid {
+    gap: 1rem;
+  }
+}

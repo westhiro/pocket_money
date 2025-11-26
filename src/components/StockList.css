@@ -4,6 +4,9 @@
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   border: 1px solid #e0e0e0;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .stock-header {
@@ -162,9 +165,12 @@
 
 @media (max-width: 480px) {
   .stock-table-container {
-    overflow-x: scroll;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -1rem;
+    padding: 0 1rem;
   }
-  
+
   .stock-table {
     min-width: 600px;
   }

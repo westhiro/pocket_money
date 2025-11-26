@@ -201,6 +201,8 @@
   .real-estate-map {
     padding: 15px;
     margin-top: 15px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .map-header h2 {
@@ -210,6 +212,8 @@
   .map-container {
     border-radius: 30px;
     padding: 15px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .map-svg {
@@ -217,8 +221,13 @@
     border-radius: 15px;
   }
 
+  .property-popup {
+    max-width: calc(100% - 30px);
+  }
+
   .popup-content {
-    min-width: 250px;
+    min-width: 200px;
+    max-width: 280px;
     padding: 12px;
   }
 
@@ -234,9 +243,68 @@
 
   .popup-label {
     font-size: 12px;
+    width: 100%;
   }
 
   .popup-value {
     text-align: left;
+  }
+
+  .btn-purchase-popup {
+    font-size: 14px;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .real-estate-map {
+    padding: 10px;
+  }
+
+  .map-container {
+    border-radius: 20px;
+    padding: 10px;
+  }
+
+  .map-svg {
+    height: 300px;
+  }
+
+  .property-popup {
+    max-width: calc(100% - 20px);
+  }
+
+  .popup-content {
+    min-width: 180px;
+    max-width: 240px;
+    padding: 10px;
+  }
+
+  .popup-content h3 {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .popup-row {
+    font-size: 12px;
+    padding: 4px 0;
+  }
+
+  .popup-label {
+    font-size: 11px;
+  }
+
+  .popup-value {
+    font-size: 12px;
+  }
+
+  .btn-purchase-popup {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .owned-badge {
+    font-size: 13px;
+    padding: 8px;
   }
 }

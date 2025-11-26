@@ -351,6 +351,9 @@
 @media (max-width: 768px) {
   .investment-page {
     padding: 0.5rem;
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .investment-type-toggle {
@@ -364,8 +367,22 @@
     max-width: none;
   }
 
+  .investment-content {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .chart-section,
+  .stocks-section {
+    width: 100%;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+
   .real-estate-container {
     padding-top: 35px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .real-estate-container .interest-rate-display {
@@ -398,8 +415,15 @@
     align-items: flex-start;
   }
 
+  .stocks-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+
   .stocks-table {
     font-size: 0.75rem;
+    min-width: 100%;
   }
 
   .stocks-table th,
@@ -411,14 +435,57 @@
     flex-direction: column;
     gap: 0.25rem;
   }
+
+  .buy-btn,
+  .sell-btn {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.6rem;
+  }
 }
 
 @media (max-width: 480px) {
-  .stocks-table-container {
-    overflow-x: scroll;
+  .investment-page {
+    padding: 0.25rem;
   }
-  
+
+  .stocks-section {
+    padding: 0.75rem;
+  }
+
+  .stocks-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -0.75rem;
+    padding: 0 0.75rem;
+  }
+
   .stocks-table {
-    min-width: 800px;
+    min-width: 700px;
+    font-size: 0.7rem;
+  }
+
+  .stocks-table th,
+  .stocks-table td {
+    padding: 0.5rem 0.35rem;
+  }
+
+  .stock-name {
+    font-size: 0.8rem;
+  }
+
+  .stock-code {
+    font-size: 0.65rem;
+  }
+
+  .sector {
+    font-size: 0.7rem;
+  }
+
+  .price {
+    font-size: 0.8rem;
+  }
+
+  .change {
+    font-size: 0.7rem;
   }
 }
