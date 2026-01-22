@@ -147,7 +147,7 @@ export const authAPI = {
   logout: () => api.post('/auth/logout'),
 
   // ユーザー情報取得
-  getMe: () => api.get('/user'),
+  getMe: () => api.get('/user-me'),
 };
 
 // お知らせ関連API

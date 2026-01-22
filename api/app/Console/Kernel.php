@@ -29,17 +29,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // 1時間ごとに20%の確率でマーケットイベントを発生
-        $schedule->command('events:trigger', ['--probability' => 20])
-                ->hourly()
-                ->timezone('Asia/Tokyo')
-                ->withoutOverlapping()
-                ->runInBackground()
-                ->appendOutputTo(storage_path('logs/market-events.log'));
-
-        // 1時間ごとに株価を更新
+        // 毎日深夜0時に株価を更新（イベント発生も含む）
         $schedule->command('stocks:update-prices')
-                ->hourly()
+                ->dailyAt('00:00')
                 ->timezone('Asia/Tokyo')
                 ->withoutOverlapping()
                 ->runInBackground()

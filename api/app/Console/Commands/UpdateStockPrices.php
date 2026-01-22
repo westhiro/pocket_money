@@ -12,7 +12,7 @@ use Carbon\Carbon;
 class UpdateStockPrices extends Command
 {
     protected $signature = 'stocks:update-prices {--force : 強制的に価格を更新する}';
-    protected $description = '1時間ごとに株価をランダムに更新する（新システム）';
+    protected $description = '毎日深夜0時に株価をランダムに更新する';
 
     public function handle()
     {
@@ -33,7 +33,7 @@ class UpdateStockPrices extends Command
             }
         }
 
-        // 1. 緊急イベント発生判定（20%の確率）
+        // 1. 緊急イベント発生判定（100%の確率 - テスト用）
         $emergencyEvent = $this->checkForEmergencyEvent();
 
         // 2. 全株式を取得して更新
@@ -103,13 +103,13 @@ class UpdateStockPrices extends Command
     }
 
     /**
-     * 緊急イベント発生判定（20%の確率）
+     * 緊急イベント発生判定（100%の確率）
      */
     private function checkForEmergencyEvent()
     {
         $randomValue = rand(1, 100);
 
-        if ($randomValue <= 20) { // 20%の確率
+        if ($randomValue <= 100) { // 100%の確率（テスト用）
             // 全ての有効なイベントからランダムに1つ選択
             $event = \DB::table('events')->where('is_active', true)->inRandomOrder()->first();
 
