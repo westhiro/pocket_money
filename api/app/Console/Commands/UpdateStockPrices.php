@@ -19,7 +19,7 @@ class UpdateStockPrices extends Command
         $this->info('株価更新処理を開始します...');
 
         $force = $this->option('force');
-        $now = Carbon::now();
+        $now = Carbon::now('Asia/Tokyo');
 
         // 今回の更新時刻（分・秒を00に丸める）
         $updateTime = $now->copy()->setMinute(0)->setSecond(0);

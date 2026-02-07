@@ -21,35 +21,46 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
       try {
         const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          const userData = JSON.parse(storedUser);
-          // まずlocalStorageのデータで表示（高速化）
-          setUser(userData);
-          setIsAuthenticated(true);
+        const loginTime = localStorage.getItem('loginTime');
 
-          // サーバーから最新のユーザー情報を取得
-          try {
-            const response = await authAPI.getMe();
-            if (response.data && response.data.success) {
-              const latestUserData = response.data.data;
-              // 最新データでstateとlocalStorageを更新
-              setUser(latestUserData);
-              localStorage.setItem('user', JSON.stringify(latestUserData));
-            }
-          } catch (apiError) {
-            // API取得失敗時はlocalStorageのデータを使用
-            console.log('Failed to fetch latest user data:', apiError);
-            // 認証エラー（401）の場合はログアウト
-            if (apiError.response?.status === 401) {
-              localStorage.removeItem('user');
-              setUser(null);
-              setIsAuthenticated(false);
+        if (storedUser && loginTime) {
+          // 24時間（86400000ミリ秒）経過チェック
+          const now = Date.now();
+          const elapsed = now - parseInt(loginTime);
+          const twentyFourHours = 24 * 60 * 60 * 1000;
+
+          if (elapsed > twentyFourHours) {
+            // 24時間超過 → 強制ログアウト
+            console.log('Session expired (24 hours)');
+            localStorage.removeItem('user');
+            localStorage.removeItem('loginTime');
+            setUser(null);
+            setIsAuthenticated(false);
+          } else {
+            // 24時間以内 → ログイン状態を維持
+            const userData = JSON.parse(storedUser);
+            setUser(userData);
+            setIsAuthenticated(true);
+
+            // サーバーから最新のユーザー情報を取得（失敗しても無視）
+            try {
+              const response = await authAPI.getMe();
+              if (response.data && response.data.success) {
+                const latestUserData = response.data.data;
+                // 最新データでstateとlocalStorageを更新
+                setUser(latestUserData);
+                localStorage.setItem('user', JSON.stringify(latestUserData));
+              }
+            } catch (apiError) {
+              // API取得失敗時はlocalStorageのデータを使用（401も無視）
+              console.log('Failed to fetch latest user data:', apiError);
             }
           }
         }
       } catch (error) {
         console.log('Not authenticated');
         localStorage.removeItem('user');
+        localStorage.removeItem('loginTime');
         setUser(null);
         setIsAuthenticated(false);
       } finally {
@@ -68,8 +79,9 @@ export const AuthProvider = ({ children }) => {
         const userData = response.data.data.user;
         setUser(userData);
         setIsAuthenticated(true);
-        // localStorageに保存
+        // localStorageに保存（ログイン時刻も記録）
         localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('loginTime', Date.now().toString());
         return { success: true, message: response.data.message };
       }
     } catch (error) {
@@ -86,8 +98,9 @@ export const AuthProvider = ({ children }) => {
         const newUser = response.data.data.user;
         setUser(newUser);
         setIsAuthenticated(true);
-        // localStorageに保存
+        // localStorageに保存（ログイン時刻も記録）
         localStorage.setItem('user', JSON.stringify(newUser));
+        localStorage.setItem('loginTime', Date.now().toString());
         return { success: true, message: response.data.message };
       }
     } catch (error) {
@@ -105,6 +118,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       // localStorageから削除
       localStorage.removeItem('user');
+      localStorage.removeItem('loginTime');
       setUser(null);
       setIsAuthenticated(false);
     }

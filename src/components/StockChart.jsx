@@ -104,7 +104,7 @@ const StockChart = ({ stock, onBuy, onSell }) => {
         <div className="price-info">
           <div className="current-price">{formatCurrency(stock.price)}</div>
           <div className={`price-change ${isPositive ? 'positive' : 'negative'}`}>
-            {isPositive ? '+' : ''}{stock.change} ({isPositive ? '+' : ''}{stock.changePercent}%)
+            {isPositive ? '+' : ''}{stock.change} ({isPositive ? '+' : ''}{parseFloat(stock.changePercent).toFixed(2)}%)
           </div>
         </div>
       </div>
