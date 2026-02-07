@@ -103,13 +103,13 @@ class UpdateStockPrices extends Command
     }
 
     /**
-     * 緊急イベント発生判定（100%の確率）
+     * 緊急イベント発生判定（20%の確率）
      */
     private function checkForEmergencyEvent()
     {
         $randomValue = rand(1, 100);
 
-        if ($randomValue <= 100) { // 100%の確率（テスト用）
+        if ($randomValue <= 20) { // 20%の確率
             // 全ての有効なイベントからランダムに1つ選択
             $event = \DB::table('events')->where('is_active', true)->inRandomOrder()->first();
 
@@ -290,8 +290,8 @@ class UpdateStockPrices extends Command
             return;
         }
 
-        // 50%の確率でトレンドを変更
-        if (rand(1, 100) <= 50) {
+        // 20%の確率でトレンドを変更
+        if (rand(1, 100) <= 20) {
             $newTrend = $stock->current_trend === 'upward' ? 'downward' : 'upward';
             $stock->update([
                 'current_trend' => $newTrend,
